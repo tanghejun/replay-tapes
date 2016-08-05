@@ -64,10 +64,6 @@ router.post('/', function(req, res, next) {
         console.log('no id');
         res.sendStatus(500)
     }
-    // collection.insert(req.body, function(err, data) {
-    //     console.log(data);
-    // })
-    res.sendStatus(200);
 });
 
 module.exports = router;
