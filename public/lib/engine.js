@@ -1,17 +1,38 @@
 var engine = (function() {
     var API = {},
-        _speed = 1,
         _session = {},
         _iframe,
         _iframeClass = 'itrack',
-        _mouseSvg = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB3aWR0aD0iMjI1IiBoZWlnaHQ9IjIzOSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gPHRpdGxlPk1vdXNlIFBvaW50ZXI8L3RpdGxlPiA8Zz4gIDx0aXRsZT5MYXllciAxPC90aXRsZT4gIDxtZXRhZGF0YSBpZD0ic3ZnXzM1Ij5pbWFnZS9zdmcreG1sPC9tZXRhZGF0YT4gIDxwYXRoIGZpbGw9IiNmZmZmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgaWQ9InBhdGg4MjciIGQ9Im0yMDEuNDUzOTk1LDExMi44NzIwMDJsLTE4My4wNjg1ODQsLTEwMC4xNTY5MDJsNzguNjA4NjAxLDE5NS4xOTM4OTdsMzEuMjk4MDEyLC01MC42NzU5OTVsNjEuODgzOTcyLDY3LjY0MTk5OGwyMy40MzcwMTIsLTIyLjgzNzAwNmwtNjMuMjY3OTksLTY2Ljk5Mzk4OGw1MS4xMDg5NzgsLTIyLjE3MjAwNXoiLz4gPC9nPiA8ZGVmcz4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzEiIHkyPSIxIj4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZThlOGU4IiBvZmZzZXQ9IjAiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjMTcxNzE3IiBvZmZzZXQ9IjEiLz4gIDwvbGluZWFyR3JhZGllbnQ+ICA8bGluZWFyR3JhZGllbnQgaWQ9InN2Z18yIiB5Mj0iMSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgc3ByZWFkTWV0aG9kPSJwYWQiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNlOGU4ZTgiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiMxNzE3MTciIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzMiIHkyPSIxIiB4MT0iMC40ODgyODEiIHkxPSIwLjM2MzI4MSIgeDI9IjEiIHNwcmVhZE1ldGhvZD0icGFkIj4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZThlOGU4IiBvZmZzZXQ9IjAiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjMTcxNzE3IiBvZmZzZXQ9IjEiLz4gIDwvbGluZWFyR3JhZGllbnQ+ICA8bGluZWFyR3JhZGllbnQgaWQ9InN2Z180IiB5Mj0iMSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgc3ByZWFkTWV0aG9kPSJwYWQiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNlZmVmZWYiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiM4MjgyODIiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzUiIHkyPSIxIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiBzcHJlYWRNZXRob2Q9InBhZCI+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjk5MjE4OCIgb2Zmc2V0PSIwIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iIzgyODI4MiIgc3RvcC1vcGFjaXR5PSIwLjk5NjA5NCIgb2Zmc2V0PSIxIi8+ICA8L2xpbmVhckdyYWRpZW50PiAgPGxpbmVhckdyYWRpZW50IGlkPSJzdmdfNiIgeTI9IjEiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHNwcmVhZE1ldGhvZD0icGFkIj4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZmZmZmZmIiBzdG9wLW9wYWNpdHk9IjAuOTkyMTg4IiBvZmZzZXQ9IjAiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjODI4MjgyIiBzdG9wLW9wYWNpdHk9IjAuOTk2MDk0IiBvZmZzZXQ9IjEiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjODI4MjgyIiBzdG9wLW9wYWNpdHk9IjAuOTk2MDk0IiBvZmZzZXQ9IjEiLz4gIDwvbGluZWFyR3JhZGllbnQ+ICA8bGluZWFyR3JhZGllbnQgaWQ9InN2Z183IiB5Mj0iMSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgc3ByZWFkTWV0aG9kPSJwYWQiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNmZmZmZmYiIHN0b3Atb3BhY2l0eT0iMC45ODgyODEiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNjY2NjY2MiIHN0b3Atb3BhY2l0eT0iMC45OTIxODgiIG9mZnNldD0iMSIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiM4MjgyODIiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiM4MjgyODIiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiM4MjgyODIiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzgiIHkyPSIxIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiBzcHJlYWRNZXRob2Q9InBhZCI+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIwLjk4ODI4MSIgb2Zmc2V0PSIwIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2NjY2NjYyIgc3RvcC1vcGFjaXR5PSIwLjk5MjE4OCIgb2Zmc2V0PSIxIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2NjY2NjYyIgc3RvcC1vcGFjaXR5PSIwLjk5MjE4OCIgb2Zmc2V0PSIxIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iIzgyODI4MiIgc3RvcC1vcGFjaXR5PSIwLjk5NjA5NCIgb2Zmc2V0PSIxIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iIzgyODI4MiIgc3RvcC1vcGFjaXR5PSIwLjk5NjA5NCIgb2Zmc2V0PSIxIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iIzgyODI4MiIgc3RvcC1vcGFjaXR5PSIwLjk5NjA5NCIgb2Zmc2V0PSIxIi8+ICA8L2xpbmVhckdyYWRpZW50PiAgPGxpbmVhckdyYWRpZW50IGlkPSJzdmdfOSI+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmZmZmZiIgb2Zmc2V0PSIwIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iIzAwMDAwMCIgb2Zmc2V0PSIxIi8+ICA8L2xpbmVhckdyYWRpZW50PiAgPGxpbmVhckdyYWRpZW50IGlkPSJzdmdfMTAiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNmZmZmZmYiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNkZGRkZGQiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzExIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmZmZmZiIgb2Zmc2V0PSIwIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2RkZGRkZCIgc3RvcC1vcGFjaXR5PSIwLjk5NjA5NCIgb2Zmc2V0PSIxIi8+ICA8L2xpbmVhckdyYWRpZW50PiAgPGxpbmVhckdyYWRpZW50IGlkPSJzdmdfMTIiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZmZmZmZmIiBvZmZzZXQ9IjAiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZjJmMmYyIiBzdG9wLW9wYWNpdHk9IjAuOTkyMTg4IiBvZmZzZXQ9IjEiLz4gIDwvbGluZWFyR3JhZGllbnQ+ICA8bGluZWFyR3JhZGllbnQgaWQ9InN2Z18xMyIgeDI9IjEiIHkyPSIxIj4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZmZmZmZmIiBzdG9wLW9wYWNpdHk9IjAuOTk2MDk0IiBvZmZzZXQ9IjAiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjYzFjMWMxIiBzdG9wLW9wYWNpdHk9IjAuOTk2MDk0IiBvZmZzZXQ9IjEiLz4gIDwvbGluZWFyR3JhZGllbnQ+ICA8bGluZWFyR3JhZGllbnQgaWQ9InN2Z18xNCIgeDI9IjEiIHkyPSIxIiB4MT0iMCIgeTE9IjAiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNmZmZmZmYiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNjMWMxYzEiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzE1IiB5Mj0iMSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgc3ByZWFkTWV0aG9kPSJwYWQiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNlZmVmZWYiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiM4MjgyODIiIHN0b3Atb3BhY2l0eT0iMC45OTYwOTQiIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzE2IiB4Mj0iMSIgeTI9IjEiPiAgIDxzdG9wIHN0b3AtY29sb3I9IiNmZmZmZmYiIG9mZnNldD0iMCIvPiAgIDxzdG9wIHN0b3AtY29sb3I9IiMwMDAwMDAiIG9mZnNldD0iMSIvPiAgPC9saW5lYXJHcmFkaWVudD4gIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ZnXzE3IiB4Mj0iMSIgeTI9IjEiIHgxPSIwIiB5MT0iMCI+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2ZmZmZmZiIgb2Zmc2V0PSIwIi8+ICAgPHN0b3Agc3RvcC1jb2xvcj0iI2UwZTBlMCIgc3RvcC1vcGFjaXR5PSIwLjk5NjA5NCIgb2Zmc2V0PSIxIi8+ICA8L2xpbmVhckdyYWRpZW50PiAgPGxpbmVhckdyYWRpZW50IGlkPSJzdmdfMTgiIHgyPSIxIiB5Mj0iMSIgeDE9IjAiIHkxPSIwIj4gICA8c3RvcCBzdG9wLWNvbG9yPSIjZmZmZmZmIiBvZmZzZXQ9IjAiLz4gICA8c3RvcCBzdG9wLWNvbG9yPSIjY2VjZWNlIiBzdG9wLW9wYWNpdHk9IjAuOTkyMTg4IiBvZmZzZXQ9IjEiLz4gIDwvbGluZWFyR3JhZGllbnQ+IDwvZGVmcz48L3N2Zz4=",
-        _mouseSize = "16px";
+        _mouseSvg = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAQAAAAm93DmAAADJUlEQVRIx63Ve0hTURwH8LO7h7vbdU7nnNt8pDPcsKb9UWbPpSlLxF5UihkmA9GoKAsi8I/6o4xeGhFFL6xA6EHpH2XPP6wIgzCz3BopNIPeSIQFZX37LZUeRGx39xwunPM7Ox9+59xzzxiYtPXfQRalVKtYSCVEMHfCyWWSgiYrtjTmSQim6wLbsa86VTJwivJK4xygdnq8RKBTObCRYXM/ymMFaUDF07VJ1Dx9b9jNFBKAkxW+GivSqfO47X6eFKDc57EgE2YogBNHcyJfMuerMmMiHBAIxc416ZGBssmcrzIRNmTATgHXB9TPMkYIeleaaA9t9EykUF0AHpMQAegk0IgJSKMnBakUbO7GUhUfUYbxRAW5JFhhpHDnrcHiSMCKOCRTTYKFXosZ0TQQaL8+QzTYV6GnzIJcIhIoQyOUNITjexxiQM7J9a3Q/cwsyMXDgDjE0JD1K3asShZzDvm+GgEmqqNcLJ1HFWQ0WDiEzTlx4X8pem+zhigjYQbooaEvZny4vh9VanW4YLTvFE/LHF2qGvKxIe5nq/X+UAmThQVOEnwn1JRZHL1dFTHBsIwwJXjqMzzr6JwdHqj1HVZBBy0RsrHcZH/8aOTM/qxwlsx7mzjKZXzngtjUriPHdnVVv1jysfhbAp1QtJRlhA7K+jb9CkzrNb1jeOB+zs6ar+XeLL3j8W/tuOA/h0aXPTRQ4WS9C8e7y+9CebyO4erOlrHrgWOp6iKtK6XaVeIIDZRnK7oXjXaqPqGwVHiSFTti+/DOyetFfnrZ8p7yYLPsLRrmJTJ2W9vUyvBwfQMv9vqSPypjKO5FRYE1OG211l/NsOGa38A04jLk2tblvYbdPT5d99I+N6DEK/fMaFGXg0U/vBiukt/u6EtR5w4yXGw+z4v6k7JYMXdpwu8T803DRQIWvHhj5/QiwBQhP+2v3de9mlR/g2Ggdq1GBPivcsDR3cSwu73HwHhJQIv57abcLw68L8jWSwIy1rXwiJfh5t4WjURgXebgZYb5/d+ztXpJQIUqsO/64MA2zLEZJQEZO7Tic6VHJY+RaMlU5HTV/Pdg/wDEX1fdN0jfnwAAAABJRU5ErkJggg==",
+        _mouseSize = "20px",
+        _mouse = {},
+        _clickPointSize = '10px';
 
     function init(session, wrapper) {
-        checkSession(session);
+        prepareSession(session);
         createFrame(wrapper);
         drawMouse();
 
+    }
+
+    function prepareSession(session) {
+        checkSession(session);
+
+        // resolve comma separated data into array
+        var result = session.d.map(function(action) {
+            var arr = action.split(',');
+            arr[arr.length - 1] = parseFloat(arr.last())
+            return arr;
+        })
+        session.d = result;
+
+        // for unknown reason, when scroll with mousemove, there's some chance the latter event captured before the previous one. so order them by timeStamp before storing them.
+        session.d.sort(function(a, b) {
+            return a.last() - b.last();
+        });
+        console.debug(session.d)
+
+        _session = session;
     }
 
     function checkSession(s) {
@@ -25,8 +46,9 @@ var engine = (function() {
         }
         /* maybe more check later, like time sequence, data format */
 
-        _session = s;
     }
+
+
 
 
     function createFrame(wrapper) {
@@ -47,33 +69,172 @@ var engine = (function() {
 
 
     function drawMouse() {
-        var mouse = document.createElement('div')
-        mouse.style.width =  _mouseSize;
-        mouse.style.height = _mouseSize;
+        _mouse = document.createElement('div')
+
+        var pointer = document.createElement('div')
+        pointer.style.position = "absolute";
+        pointer.style.width = _mouseSize;
+        pointer.style.height = _mouseSize;
         var image = new Image();
         image.src = _mouseSvg;
-        mouse.style.backgroundImage = "url('" + image.src + "')";
-        mouse.style.backgroundSize = _mouseSize;
-        mouse.style.backgroundRepeat = 'no-repeat';
-        
-        mouse.style.position = "absolute";
-        mouse.style.left = "0px";
-        mouse.style.top = "0px";
+        pointer.style.backgroundImage = "url('" + image.src + "')";
+        pointer.style.backgroundSize = _mouseSize;
+        pointer.style.backgroundRepeat = 'no-repeat';
+        pointer.style.backgroundPosition = '-1px 3px';
+
+        var clickHinter = document.createElement('div');
+        clickHinter.style.position = "absolute";
+        clickHinter.style.left = "-5px";
+        clickHinter.style.top = "-6px";
+        clickHinter.style.width = _mouseSize;
+        clickHinter.style.height = _mouseSize;
+        clickHinter.style.borderRadius = '50%';
+        clickHinter.style.backgroundColor = 'yellow';
+
+        _mouse.style.position = "absolute";
+        _mouse.style.left = "10px";
+        _mouse.style.top = "10px";
+
+        _mouse.appendChild(clickHinter);
+        _mouse.appendChild(pointer);
 
         _iframe.contentWindow.addEventListener('DOMContentLoaded', function() {
-            _iframe.contentDocument.body.appendChild(mouse);
-        })
+            // emit events to outside world.
+            console.info('iTrackFrameContentLoaded');
+            window.dispatchEvent(new Event('iTrackFrameContentLoaded'));
+            _iframe.contentDocument.body.appendChild(_mouse);
+        }, false)
+        _iframe.contentWindow.addEventListener('load', function() {
+            // emit events to outside world.
+            console.info('iTrackFrameLoaded');
+            window.dispatchEvent(new Event('iTrackFrameLoaded'));
+        }, false)
     }
 
     function play(speed) {
-        speed = speed || _speed;
+        var mySession = Object.assign({}, _session);
+        console.log('_session', _session.d);
+        // console.log('before',mySession.d[0]);
+        speed = speed || 1;
+        if (typeof speed !== 'number' || speed !== speed) {
+            throw 'speed should be a number';
+        }
         if (speed > 5 || speed < 0) {
-            throw 'invalid speed'
+            throw 'invalid speed number, (0,5)';
         }
 
-        _session.d.map(function(action) {
-            action.t /= speed;
-        })
+        if (speed !== 1) {
+            var data = mySession.d.map(function(eachEvent) {
+                eachEvent[eachEvent.length - 1] /= speed;
+                return eachEvent;
+            })
+            mySession.d = data;
+        }
+
+        // play logic
+        var i = 0;
+        var length = mySession.d.length;
+        var time = 0;
+
+        var timer = setInterval(function() {
+            if (i === length) {
+                clearInterval(timer);
+                return;
+            }
+            var eachEvent = mySession.d[i];
+            if (around(time, eachEvent.last())) {
+                if (eachEvent[0] === 'm') {
+                    move(eachEvent);
+
+                } else if (eachEvent[0] === 's') {
+                    scroll(eachEvent);
+
+                } else if (eachEvent[0] === 'k') {
+                    keypress(eachEvent);
+
+                } else if (eachEvent[0] === 'c') {
+                    click(eachEvent);
+                }
+                i++;
+            }
+            time += 10;
+        }, 10)
+
+
+    }
+
+    function around(now, t) {
+        console.log('around', now);
+        return Math.abs(now - t) <= 11;
+    }
+
+    function move(event) {
+        _mouse.style.left = event[1] + 'px';
+        _mouse.style.top = event[2] + 'px';
+        console.log('move to ', event);
+    }
+
+    function scroll(event) {
+        _iframe.contentWindow.scroll(event[1], event[2]);
+        console.log('scroll to', event);
+    }
+
+    function keypress(event) {
+
+    }
+
+    function click(event) {
+        var clickPoint = document.createElement('div');
+        clickPoint.style.position = "absolute";
+        clickPoint.style.width = _clickPointSize;
+        clickPoint.style.height = _clickPointSize;
+        clickPoint.style.backgroundColor = "red";
+        clickPoint.style.borderRadius = "50%";
+        clickPoint.style.left = event[1] + 'px';
+        clickPoint.style.top = event[2] + 'px';
+        _iframe.contentDocument.body.appendChild(clickPoint);
+        console.log('click at', event);
+
+    }
+
+    /* util */
+    if (!Array.prototype.last) {
+        Array.prototype.last = function() {
+            return this[this.length - 1];
+        };
+    };
+
+    if (!Object.assign) {
+        Object.defineProperty(Object, 'assign', {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function(target) {
+                'use strict';
+                if (target === undefined || target === null) {
+                    throw new TypeError('Cannot convert first argument to object');
+                }
+
+                var to = Object(target);
+                for (var i = 1; i < arguments.length; i++) {
+                    var nextSource = arguments[i];
+                    if (nextSource === undefined || nextSource === null) {
+                        continue;
+                    }
+                    nextSource = Object(nextSource);
+
+                    var keysArray = Object.keys(nextSource);
+                    for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+                        var nextKey = keysArray[nextIndex];
+                        var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+                        if (desc !== undefined && desc.enumerable) {
+                            to[nextKey] = nextSource[nextKey];
+                        }
+                    }
+                }
+                return to;
+            }
+        });
     }
 
     API.init = init;

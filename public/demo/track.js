@@ -91,7 +91,7 @@ var itrack = (function(w, $) {
         } else if (e.type === eventsToTrack[2]) {
             arr.push('s', w.scrollX, w.scrollY);
         } else if (e.type === eventsToTrack[3]) {
-        	arr.push('m', e.pageX, e.pageY);
+            arr.push('m', e.pageX, e.pageY);
         }
 
         arr.push(e.timeStamp);
@@ -122,11 +122,12 @@ var itrack = (function(w, $) {
     function store() {
 
         setInterval(function() {
+
             //save length before sending, splice it after async operation succeeds.
             var sendLength = _events.length;
             var prepareData = {
-            	i: guid,
-            	d: _events
+                i: guid,
+                d: _events
             }
             if (sendLength) {
                 console.log(JSON.stringify(prepareData));
@@ -146,14 +147,14 @@ var itrack = (function(w, $) {
 
     function init() {
         //note: if no parent window, w.parent equal to itself.
-        if((w.parent !== w) && w.parent.ITRACK_ENABLED) {
+        if((w.parent !== w)  && !w.parent.ITRACK_ENABLED) {
+            console.info('iTrack not enabled');
+        } else {
             console.info('iTrack enabled');
             guid = generateUUID(); // only generate once for one session.
             storeMeta();
             track();
             store();
-        } else {
-            console.info('iTrack not enabled');
         }
     }
 

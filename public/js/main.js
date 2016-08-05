@@ -48,15 +48,22 @@
         return api;
     }
 
-    player.$inject = ['event', 'session'];
+    player.$inject = ['event', 'session', '$window'];
 
-    function player(event, session) {
+    function player(event, session, $window) {
         return {
             restrict: 'E',
+            template: '<div>'+
+            			'<button ng-click="play()" ng-disabled="loading">play</button>' +
+            			'<button ng-click="play(2)" ng-disabled="loading">x2</button>' +
+            		  '</div>',
             link: function(scope, element) {
+                scope.play = engine.play;
+                scope.loading = true;
                 activate();
 
                 //================
+
                 function activate() {
                     event.list().then(function(data) {
                         var length = data.data.length;
@@ -66,6 +73,11 @@
                                 engine.init(session, element);
                             })
                     })
+
+                	$window.addEventListener('iTrackFrameLoaded', function(e) {
+                		scope.loading = false;
+                		scope.$apply();
+                	}, false)
                 }
             }
         }
