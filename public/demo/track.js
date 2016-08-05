@@ -145,10 +145,16 @@ var itrack = (function(w, $) {
     }
 
     function init() {
-        guid = generateUUID(); // only generate once for one session.
-        storeMeta();
-        track();
-        store();
+        //note: if no parent window, w.parent equal to itself.
+        if((w.parent !== w) && w.parent.ITRACK_ENABLED) {
+            console.info('iTrack enabled');
+            guid = generateUUID(); // only generate once for one session.
+            storeMeta();
+            track();
+            store();
+        } else {
+            console.info('iTrack not enabled');
+        }
     }
 
     function print() {
@@ -186,7 +192,6 @@ var itrack = (function(w, $) {
 
 
     $(document).ready(function() {
-        console.log('tracking...')
         init();
     })
 
