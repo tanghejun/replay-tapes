@@ -60,7 +60,7 @@ var engine = (function() {
         iframe.src = _session.m.url;
         iframe.width = w;
         iframe.height = h;
-        iframe.class = _iframeClass;
+        iframe.className = _iframeClass;
 
         document.body.appendChild(iframe);
         _iframe = iframe;
@@ -112,6 +112,12 @@ var engine = (function() {
     }
 
     function play(speed) {
+        // clean up
+        var clickPointWrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper')
+        if(clickPointWrapper.length) {
+            _iframe.contentDocument.body.removeChild(clickPointWrapper[0])
+        }
+
         var mySession = Object.assign({}, _session);
         console.log('_session', _session.d);
         // console.log('before',mySession.d[0]);
@@ -184,6 +190,13 @@ var engine = (function() {
     }
 
     function click(event) {
+        var wrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper');
+        if(wrapper.length === 0) {
+            var wrapper = document.createElement('div');
+            wrapper.className = "click-point-wrapper"
+        } else {
+            wrapper = wrapper[0];
+        }
         var clickPoint = document.createElement('div');
         clickPoint.style.position = "absolute";
         clickPoint.style.width = _clickPointSize;
@@ -192,7 +205,10 @@ var engine = (function() {
         clickPoint.style.borderRadius = "50%";
         clickPoint.style.left = event[1] + 'px';
         clickPoint.style.top = event[2] + 'px';
-        _iframe.contentDocument.body.appendChild(clickPoint);
+        clickPoint.className = "click-point";
+
+        wrapper.appendChild(clickPoint);
+        _iframe.contentDocument.body.appendChild(wrapper);
         console.log('click at', event);
 
     }

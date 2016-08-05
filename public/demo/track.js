@@ -8,7 +8,7 @@ var itrack = (function(w, $) {
         eventsApi = server + '/events',
         guid,
         sendInterval = 5000, // try to send to server every 5s.
-        throttleInterval = 250;
+        throttleInterval = 100;
 
     /**
      * get browser meta including:

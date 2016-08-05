@@ -54,12 +54,19 @@
         return {
             restrict: 'E',
             template: '<div>'+
+            			'<p ng-hide="meta">loading...</p>'+
+            			'<ul ng-show="meta">'+
+            				'<li>User Agent: {{meta.ua}}</li>'+
+            				'<li>URL: {{meta.url}}</li>'+
+            				'<li>Window Size: {{meta.size}}</li>'+
+            			'</ul>'+
             			'<button ng-click="play()" ng-disabled="loading">play</button>' +
             			'<button ng-click="play(2)" ng-disabled="loading">x2</button>' +
             		  '</div>',
             link: function(scope, element) {
                 scope.play = engine.play;
                 scope.loading = true;
+                scope.meta = null;
                 activate();
 
                 //================
@@ -70,6 +77,7 @@
                         session.get(data.data[length - 1].i)
                             .then(function(sdata) {
                                 var session = sdata.data;
+                                scope.meta = session.m;
                                 engine.init(session, element);
                             })
                     })
