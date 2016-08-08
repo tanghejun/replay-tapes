@@ -2,7 +2,7 @@ var itrack = (function(w, $) {
 
     var itrack = {},
         _events = [],
-        eventsToTrack = ['click', 'keydown', 'scroll', 'mousemove'],
+        eventsToTrack = ['click', 'scroll', 'mousemove'],
         server = 'http://localhost:9000',
         metaApi = server + '/metas',
         eventsApi = server + '/events',
@@ -67,11 +67,53 @@ var itrack = (function(w, $) {
         return uuid;
     }
 
+    /* simple implementation of get element's selector path,
+    http://stackoverflow.com/questions/2068272/getting-a-jquery-selector-for-an-element
+    consider using a lib like: 
+    https://github.com/autarc/optimal-select */
+    jQuery.fn.getPath = function () {
+        if (this.length != 1) throw 'Requires one element.';
+
+        var path, node = this;
+        while (node.length) {
+            var realNode = node[0];
+            var name = (
+
+                // IE9 and non-IE
+                realNode.localName ||
+
+                // IE <= 8
+                realNode.tagName ||
+                realNode.nodeName
+
+            );
+
+            // on IE8, nodeName is '#document' at the top level, but we don't need that
+            if (!name || name == '#document') break;
+
+            name = name.toLowerCase();
+            if (realNode.id) {
+                // As soon as an id is found, there's no need to specify more.
+                return name + '#' + realNode.id + (path ? '>' + path : '');
+            } else if (realNode.className) {
+                name += '.' + realNode.className.split(/\s+/).join('.');
+            }
+
+            var parent = node.parent(), siblings = parent.children(name);
+            if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+            path = name + (path ? '>' + path : '');
+
+            node = parent;
+        }
+
+        return path;
+    };
+
     /**
      * extract event specific data and construct it into a minimal string to save bandwidth;
      * 
      * format:
-     * click    c, pageX, pageY, timeStamp
+     * click    c, pageX, pageY, element selector, timeStamp
      * keypress k, keyCode, timeStamp
      * scroll   s, scrollX, scollY, timeStamp
      * 
@@ -83,18 +125,34 @@ var itrack = (function(w, $) {
         var arr = [];
 
         if (e.type === eventsToTrack[0]) {
-            arr.push('c', e.pageX, e.pageY);
+            var encodedCssSelector = btoa($(e.target).getPath());
 
-        } else if (e.type === eventsToTrack[1]) {
-            arr.push('k', e.keyCode);
+            // timeStamp could be very precise, we only need it to be milisecond.
+            arr.push('c', e.pageX, e.pageY, encodedCssSelector, parseInt(e.timeStamp));
 
+            // listen to input change event
+            if(e.target.nodeName === "INPUT" && e.target.type !== "password") {
+                e.target.addEventListener('input', function(inputEvent) {
+                    var arr1 = [];
+                    arr1.push('i', e.target.value, parseInt(inputEvent.timeStamp))
+                    _events.push(arr1.join(','));
+                })
+            }
+
+        } 
+        // else if (e.type === eventsToTrack[1]) {
+        //     // only track keypress when focus in input
+        //     if(e.target.nodeName === "INPUT") {
+        //         arr.push('k', e.key, e.keyCode, e.target.value);
+        //     }
+
+        // }
+         else if (e.type === eventsToTrack[1]) {
+            arr.push('s', w.scrollX, w.scrollY, parseInt(e.timeStamp));
         } else if (e.type === eventsToTrack[2]) {
-            arr.push('s', w.scrollX, w.scrollY);
-        } else if (e.type === eventsToTrack[3]) {
-            arr.push('m', e.pageX, e.pageY);
+            arr.push('m', e.pageX, e.pageY, parseInt(e.timeStamp));
         }
 
-        arr.push(e.timeStamp);
         return arr.join(',');
     }
 

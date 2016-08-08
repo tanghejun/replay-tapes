@@ -21,7 +21,12 @@ var engine = (function() {
         // resolve comma separated data into array
         var result = session.d.map(function(action) {
             var arr = action.split(',');
-            arr[arr.length - 1] = parseFloat(arr.last())
+            // parse timeStamp
+            arr[arr.length - 1] = parseInt(arr.last())
+            // decode element selector for click data
+            if(arr[0] === 'c') {
+                arr[3] = atob(arr[3]);
+            }
             return arr;
         })
         session.d = result;
@@ -30,6 +35,7 @@ var engine = (function() {
         session.d.sort(function(a, b) {
             return a.last() - b.last();
         });
+
         console.debug(session.d)
 
         _session = session;
@@ -156,10 +162,13 @@ var engine = (function() {
                     scroll(eachEvent);
 
                 } else if (eachEvent[0] === 'k') {
-                    keypress(eachEvent);
+                    keypress(eachEvent, i);
 
                 } else if (eachEvent[0] === 'c') {
                     click(eachEvent);
+
+                } else if(eachEvent[0] === 'i') {
+                    input(eachEvent, i);
                 }
                 i++;
             }
@@ -170,7 +179,7 @@ var engine = (function() {
     }
 
     function around(now, t) {
-        console.log('around', now);
+        console.log('now', now);
         return Math.abs(now - t) <= 11;
     }
 
@@ -185,11 +194,23 @@ var engine = (function() {
         console.log('scroll to', event);
     }
 
-    function keypress(event) {
-
+    /* need index to search forward to find the input element */
+    function input(event, index) {
+        var inputElement = null;
+        for (var i = index; i >= 0; i--) {
+            if(_session.d[i][0] === 'c') {
+                inputElement = _iframe.contentDocument.querySelector(_session.d[i][3]);
+                break;
+            }
+        }
+        if(inputElement) {
+            inputElement.value = event[1]; 
+        }
     }
 
+
     function click(event) {
+        // create clickPoint wrapper if there isnt one.
         var wrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper');
         if(wrapper.length === 0) {
             var wrapper = document.createElement('div');
@@ -197,6 +218,7 @@ var engine = (function() {
         } else {
             wrapper = wrapper[0];
         }
+        // style checkPoint
         var clickPoint = document.createElement('div');
         clickPoint.style.position = "absolute";
         clickPoint.style.width = _clickPointSize;
@@ -209,6 +231,15 @@ var engine = (function() {
 
         wrapper.appendChild(clickPoint);
         _iframe.contentDocument.body.appendChild(wrapper);
+
+        // simulate user click, focus and dispatch click event
+        var clickTarget = _iframe.contentDocument.querySelector(event[3]);
+        if(clickTarget) {
+            clickTarget.focus();
+
+            // ele.click() fn only works for certain element types, like input
+            clickTarget.click();
+        }
         console.log('click at', event);
 
     }
