@@ -239,6 +239,12 @@ var engine = (function() {
 
             // ele.click() fn only works for certain element types, like input
             clickTarget.click();
+            if(clickTarget.nodeName === "LABEL" && clickTarget.attributes['for']) {
+                _iframe.contentDocument.getElementById(clickTarget.attributes['for'].nodeValue).focus()
+
+            }
+        } else {
+            console.warn('clickTarget not found: ', clickTarget);
         }
         console.log('click at', event);
 

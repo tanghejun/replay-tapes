@@ -100,7 +100,7 @@ var itrack = (function(w, $) {
             }
 
             var parent = node.parent(), siblings = parent.children(name);
-            if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+            if (siblings.length > 1) name += ':nth-child(' + parseInt(siblings.index(node) + 1) + ')';
             path = name + (path ? '>' + path : '');
 
             node = parent;
@@ -131,14 +131,11 @@ var itrack = (function(w, $) {
             arr.push('c', e.pageX, e.pageY, encodedCssSelector, parseInt(e.timeStamp));
 
             // listen to input change event
-            if(e.target.nodeName === "INPUT" && e.target.type !== "password") {
-                e.target.addEventListener('input', function(inputEvent) {
-                    var arr1 = [];
-                    arr1.push('i', e.target.value, parseInt(inputEvent.timeStamp))
-                    _events.push(arr1.join(','));
-                })
+            var targetNode = e.target.nodeName;
+            if(targetNode === "SELECT" || targetNode === "TEXTAREA" || (e.target.nodeName === "INPUT" && e.target.type !== "password")) {
+                e.target.addEventListener('input', inputEventHandler);
             }
-
+            
         } 
         // else if (e.type === eventsToTrack[1]) {
         //     // only track keypress when focus in input
@@ -155,6 +152,13 @@ var itrack = (function(w, $) {
 
         return arr.join(',');
     }
+    function inputEventHandler(inputEvent) {
+        console.log(inputEvent.target.value);
+        var arr = [];
+        arr.push('i', inputEvent.target.value, parseInt(inputEvent.timeStamp))
+        _events.push(arr.join(','));
+    }
+
 
     /**
      * setup event listener for tracking.
