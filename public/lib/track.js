@@ -2,6 +2,9 @@ var itrack = (function(w, $) {
 
     var itrack = {},
         _events = [],
+
+        // listen to mouseup instead of click since click has greater chance to be canceled bubbling.
+        // still, we can set 'useCapture=true', but not all browsers support that.
         eventsToTrack = ['click', 'scroll', 'mousemove'],
         server = 'http://localhost:9000',
         metaApi = server + '/metas',
@@ -9,7 +12,8 @@ var itrack = (function(w, $) {
         guid,
         sendInterval = 5000, // try to send to server every 5s.
         throttleInterval = 100,
-        _timer = null;
+        _storeTimer = null,
+        _clearTimer = null;
 
     /**
      * get browser meta including:
@@ -99,9 +103,11 @@ var itrack = (function(w, $) {
             } else if (realNode.className) {
                 name += '.' + realNode.className.split(/\s+/).join('.');
             }
-
             var parent = node.parent(), siblings = parent.children(name);
-            if (siblings.length > 1) name += ':nth-child(' + parseInt(siblings.index(node) + 1) + ')';
+            var nthChild = siblings.index(node) + 1;
+            if (siblings.length > 1) {
+                name += ':nth-of-type(' + nthChild + ')';
+            }
             path = name + (path ? '>' + path : '');
 
             node = parent;
@@ -121,6 +127,7 @@ var itrack = (function(w, $) {
      * @param  {Event} original event
      * @return {Object} obj contains event specific data
      */
+    var lastScrollElement = null;
     function extractEventInfo(e) {
         console.log(e);
         var arr = [];
@@ -137,16 +144,20 @@ var itrack = (function(w, $) {
                 e.target.addEventListener('input', inputEventHandler);
             }
             
-        } 
-        // else if (e.type === eventsToTrack[1]) {
-        //     // only track keypress when focus in input
-        //     if(e.target.nodeName === "INPUT") {
-        //         arr.push('k', e.key, e.keyCode, e.target.value);
-        //     }
-
-        // }
-         else if (e.type === eventsToTrack[1]) {
-            arr.push('s', w.scrollX, w.scrollY, parseInt(e.timeStamp));
+        } else if (e.type === eventsToTrack[1]) {
+            var encodedCssSelector = "";
+            if(e.target === w.document) {
+                encodedCssSelector = btoa(unescape(encodeURIComponent('document')));
+                arr.push('s', w.scrollX, w.scrollY, encodedCssSelector, parseInt(e.timeStamp));
+            } else {
+                encodedCssSelector = btoa(unescape(encodeURIComponent($(e.target).getPath())));
+                arr.push('s', e.target.scrollLeft, e.target.scrollTop, encodedCssSelector, parseInt(e.timeStamp));
+            }
+            // remove the element if it's the same scroll target to save bits.
+            if(e.target === lastScrollElement) {
+                arr.splice(3, 1);
+            }
+            lastScrollElement = e.target;
         } else if (e.type === eventsToTrack[2]) {
             arr.push('m', e.pageX, e.pageY, parseInt(e.timeStamp));
         }
@@ -167,10 +178,14 @@ var itrack = (function(w, $) {
     function track() {
         // setup listeners
         var spacedEvents = eventsToTrack.join(' ');
-        $(document).on(spacedEvents, throttle(eventListener, throttleInterval));
+
+        // useCapture = true in case of some clicked element will stop event bubbling.
+        eventsToTrack.forEach(function(event) {
+            w.addEventListener(event, throttle(eventListener, throttleInterval), true)
+        })
 
         function eventListener(e) {
-            _events.push(extractEventInfo(e.originalEvent));
+            _events.push(extractEventInfo(e));
         }
     }
 
@@ -225,7 +240,7 @@ var itrack = (function(w, $) {
     // stop tracking, actually tracking is still on, but just not storing it. and periodically clear the array
     // to release memory.
     function stop() {
-        clearInterval(_timer);
+        clearInterval(_storeTimer);
         _clearTimer = setInterval(function() {
             if(_events.length > 500) {
                 _events = [];

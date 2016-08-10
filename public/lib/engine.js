@@ -27,9 +27,9 @@ var engine = (function() {
         var result = session.d.map(function(action) {
             var arr = action.split(',');
             // parse timeStamp
-            arr[arr.length - 1] = parseInt(arr.last())
-            // decode element selector for click data
-            if(arr[0] === 'c') {
+            arr[arr.length - 1] = parseInt(arr.last());
+            // decode element selector for click/scroll data
+            if (arr[0] === 'c' || (arr[0] === 's' && arr.length === 5)) {
                 arr[3] = decodeURIComponent(escape(atob(arr[3])));
             }
             return arr;
@@ -124,23 +124,24 @@ var engine = (function() {
     }
 
     function pause() {
-        if(_context.timer) {
+        if (_context.timer) {
             clearInterval(_context.timer);
         }
 
     }
 
     function stop() {
-        if(_context.timer) {
+        if (_context.timer) {
             clearInterval(_context.timer);
         }
         resetContext();
         cleanDots();
 
     }
+
     function cleanDots() {
         var clickPointWrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper')
-        if(clickPointWrapper.length) {
+        if (clickPointWrapper.length) {
             _iframe.contentDocument.body.removeChild(clickPointWrapper[0])
         }
     }
@@ -171,6 +172,7 @@ var engine = (function() {
         _context.timer = setInterval(function() {
             if (_context.index === length) {
                 stop();
+                return;
             }
             var eachEvent = mySession.d[_context.index];
             if (around(_context.time, eachEvent.last())) {
@@ -178,7 +180,7 @@ var engine = (function() {
                     move(eachEvent);
 
                 } else if (eachEvent[0] === 's') {
-                    scroll(eachEvent);
+                    scroll(eachEvent, _context.index);
 
                 } else if (eachEvent[0] === 'k') {
                     keypress(eachEvent, _context.index);
@@ -186,7 +188,7 @@ var engine = (function() {
                 } else if (eachEvent[0] === 'c') {
                     click(eachEvent);
 
-                } else if(eachEvent[0] === 'i') {
+                } else if (eachEvent[0] === 'i') {
                     input(eachEvent, _context.index);
                 }
                 _context.index++;
@@ -214,22 +216,45 @@ var engine = (function() {
         console.log('move to ', event);
     }
 
-    function scroll(event) {
-        _iframe.contentWindow.scroll(event[1], event[2]);
-        console.log('scroll to', event);
+    function scroll(event, index) {
+        var lastScrollSelector = findLastScrollSelector(index);
+        if (!lastScrollSelector) {
+            console.error('scroll target not found');
+        } else {
+            if (lastScrollSelector === 'document') {
+                _iframe.contentWindow.scroll(event[1], event[2]);
+                console.log('scroll document to', event);
+            } else {
+                var target = _iframe.contentDocument.querySelector(lastScrollSelector);
+                target.scrollLeft = event[1];
+                target.scrollTop = event[2];
+            }
+            console.log('scroll to', target, event);
+        }
+    }
+
+    function findLastScrollSelector(index) {
+        var selector = null;
+        for (var i = index; i >= 0; i--) {
+            if (_session.d[i][0] === 's' && _session.d[i].length === 5) {
+                selector = _session.d[i][3];
+                break;
+            }
+        }
+        return selector;
     }
 
     /* need index to search forward to find the input element */
     function input(event, index) {
         var inputElement = null;
         for (var i = index; i >= 0; i--) {
-            if(_session.d[i][0] === 'c') {
+            if (_session.d[i][0] === 'c') {
                 inputElement = _iframe.contentDocument.querySelector(_session.d[i][3]);
                 break;
             }
         }
-        if(inputElement) {
-            inputElement.value = event[1]; 
+        if (inputElement) {
+            inputElement.value = event[1];
         }
     }
 
@@ -237,7 +262,7 @@ var engine = (function() {
     function click(event) {
         // create clickPoint wrapper if there isnt one.
         var wrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper');
-        if(wrapper.length === 0) {
+        if (wrapper.length === 0) {
             var wrapper = document.createElement('div');
             wrapper.className = "click-point-wrapper"
         } else {
@@ -261,12 +286,12 @@ var engine = (function() {
 
         // simulate user click, focus and dispatch click event
         var clickTarget = _iframe.contentDocument.querySelector(event[3]);
-        if(clickTarget) {
+        if (clickTarget) {
             clickTarget.focus();
 
             // ele.click() fn only works for certain element types, like input
             clickTarget.click();
-            if(clickTarget.nodeName === "LABEL" && clickTarget.attributes['for']) {
+            if (clickTarget.nodeName === "LABEL" && clickTarget.attributes['for']) {
                 _iframe.contentDocument.getElementById(clickTarget.attributes['for'].nodeValue).focus()
 
             }
