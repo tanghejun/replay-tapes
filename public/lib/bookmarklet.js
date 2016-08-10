@@ -1,21 +1,14 @@
 var engine = (function() {
     var API = {},
         _session = {},
-        _iframe,
         _iframeClass = 'itrack',
         _mouseSvg = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAQAAAAm93DmAAADJUlEQVRIx63Ve0hTURwH8LO7h7vbdU7nnNt8pDPcsKb9UWbPpSlLxF5UihkmA9GoKAsi8I/6o4xeGhFFL6xA6EHpH2XPP6wIgzCz3BopNIPeSIQFZX37LZUeRGx39xwunPM7Ox9+59xzzxiYtPXfQRalVKtYSCVEMHfCyWWSgiYrtjTmSQim6wLbsa86VTJwivJK4xygdnq8RKBTObCRYXM/ymMFaUDF07VJ1Dx9b9jNFBKAkxW+GivSqfO47X6eFKDc57EgE2YogBNHcyJfMuerMmMiHBAIxc416ZGBssmcrzIRNmTATgHXB9TPMkYIeleaaA9t9EykUF0AHpMQAegk0IgJSKMnBakUbO7GUhUfUYbxRAW5JFhhpHDnrcHiSMCKOCRTTYKFXosZ0TQQaL8+QzTYV6GnzIJcIhIoQyOUNITjexxiQM7J9a3Q/cwsyMXDgDjE0JD1K3asShZzDvm+GgEmqqNcLJ1HFWQ0WDiEzTlx4X8pem+zhigjYQbooaEvZny4vh9VanW4YLTvFE/LHF2qGvKxIe5nq/X+UAmThQVOEnwn1JRZHL1dFTHBsIwwJXjqMzzr6JwdHqj1HVZBBy0RsrHcZH/8aOTM/qxwlsx7mzjKZXzngtjUriPHdnVVv1jysfhbAp1QtJRlhA7K+jb9CkzrNb1jeOB+zs6ar+XeLL3j8W/tuOA/h0aXPTRQ4WS9C8e7y+9CebyO4erOlrHrgWOp6iKtK6XaVeIIDZRnK7oXjXaqPqGwVHiSFTti+/DOyetFfnrZ8p7yYLPsLRrmJTJ2W9vUyvBwfQMv9vqSPypjKO5FRYE1OG211l/NsOGa38A04jLk2tblvYbdPT5d99I+N6DEK/fMaFGXg0U/vBiukt/u6EtR5w4yXGw+z4v6k7JYMXdpwu8T803DRQIWvHhj5/QiwBQhP+2v3de9mlR/g2Ggdq1GBPivcsDR3cSwu73HwHhJQIv57abcLw68L8jWSwIy1rXwiJfh5t4WjURgXebgZYb5/d+ztXpJQIUqsO/64MA2zLEZJQEZO7Tic6VHJY+RaMlU5HTV/Pdg/wDEX1fdN0jfnwAAAABJRU5ErkJggg==",
         _mouseSize = "20px",
         _mouse = {},
-        _clickPointSize = '10px',
-        _context = {
-            time: 0,
-            index: 0,
-            timer: null
-        };
+        _clickPointSize = '10px';
 
-    function init(session, wrapper) {
+    function init(session) {
         prepareSession(session);
-        createFrame(wrapper);
         drawMouse();
 
     }
@@ -23,39 +16,33 @@ var engine = (function() {
     function prepareSession(session) {
         checkSession(session);
 
-        // resolve comma separated data into array
         var result = session.d.map(function(action) {
             var arr = action.split(',');
-            // parse timeStamp
-            arr[arr.length - 1] = parseInt(arr.last())
-            // decode element selector for click data
+            arr[arr.length - 1] = parseInt(arr.last());
             if(arr[0] === 'c') {
                 arr[3] = atob(arr[3]);
             }
             return arr;
-        })
+        });
         session.d = result;
 
-        // for unknown reason, when scroll with mousemove, there's some chance the latter event captured before the previous one. so order them by timeStamp before storing them.
         session.d.sort(function(a, b) {
             return a.last() - b.last();
         });
 
-        console.debug(session.d)
+        console.debug(session.d);
 
         _session = session;
     }
 
     function checkSession(s) {
         if (toString.call(s) !== '[object Object]') {
-            throw 'session should be an object'
+            throw 'session should be an object';
         }
 
-        /* check meta/data/id */
         if (!s.i || !s.m || !s.d) {
-            throw "corrupted session data"
+            throw "corrupted session data";
         }
-        /* maybe more check later, like time sequence, data format */
 
     }
 
@@ -64,25 +51,24 @@ var engine = (function() {
 
     function createFrame(wrapper) {
         var src = _session.m.url;
-        var w = _session.m.size.split(',')[0]
-        var h = _session.m.size.split(',')[1]
+        var w = _session.m.size.split(',')[0];
+        var h = _session.m.size.split(',')[1];
 
         var iframe = document.createElement('iframe');
-        iframe.src = _session.m.url;
+        iframe.src = src;
         iframe.width = w;
         iframe.height = h;
         iframe.className = _iframeClass;
 
         document.body.appendChild(iframe);
-        _iframe = iframe;
         return iframe;
     }
 
 
     function drawMouse() {
-        _mouse = document.createElement('div')
+        _mouse = document.createElement('div');
 
-        var pointer = document.createElement('div')
+        var pointer = document.createElement('div');
         pointer.style.position = "absolute";
         pointer.style.width = _mouseSize;
         pointer.style.height = _mouseSize;
@@ -103,52 +89,24 @@ var engine = (function() {
         clickHinter.style.backgroundColor = 'yellow';
 
         _mouse.style.position = "absolute";
-        _mouse.style.zIndex = 9999998;
+        _mouse.style.zIndex = 99999999;
         _mouse.style.left = "10px";
         _mouse.style.top = "10px";
 
         _mouse.appendChild(clickHinter);
         _mouse.appendChild(pointer);
 
-        _iframe.contentWindow.addEventListener('DOMContentLoaded', function() {
-            // emit events to outside world.
-            console.info('iTrackFrameContentLoaded');
-            window.dispatchEvent(new Event('iTrackFrameContentLoaded'));
-            _iframe.contentDocument.body.appendChild(_mouse);
-        }, false)
-        _iframe.contentWindow.addEventListener('load', function() {
-            // emit events to outside world.
-            console.info('iTrackFrameLoaded');
-            window.dispatchEvent(new Event('iTrackFrameLoaded'));
-        }, false)
-    }
-
-    function pause() {
-        if(_context.timer) {
-            clearInterval(_context.timer);
-        }
-
-    }
-
-    function stop() {
-        if(_context.timer) {
-            clearInterval(_context.timer);
-        }
-        resetContext();
-        cleanDots();
-
-    }
-    function cleanDots() {
-        var clickPointWrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper')
-        if(clickPointWrapper.length) {
-            _iframe.contentDocument.body.removeChild(clickPointWrapper[0])
-        }
+        document.body.appendChild(_mouse);
     }
 
     function play(speed) {
+        var clickPointWrapper = document.getElementsByClassName('click-point-wrapper');
+        if(clickPointWrapper.length) {
+            document.body.removeChild(clickPointWrapper[0]);
+        }
+
         var mySession = Object.assign({}, _session);
         console.log('_session', _session.d);
-        // console.log('before',mySession.d[0]);
         speed = speed || 1;
         if (typeof speed !== 'number' || speed !== speed) {
             throw 'speed should be a number';
@@ -161,19 +119,21 @@ var engine = (function() {
             var data = mySession.d.map(function(eachEvent) {
                 eachEvent[eachEvent.length - 1] /= speed;
                 return eachEvent;
-            })
+            });
             mySession.d = data;
         }
 
-        // play logic
+        var i = 0;
         var length = mySession.d.length;
+        var time = 0;
 
-        _context.timer = setInterval(function() {
-            if (_context.index === length) {
-                stop();
+        var timer = setInterval(function() {
+            if (i === length) {
+                clearInterval(timer);
+                return;
             }
-            var eachEvent = mySession.d[_context.index];
-            if (around(_context.time, eachEvent.last())) {
+            var eachEvent = mySession.d[i];
+            if (around(time, eachEvent.last())) {
                 if (eachEvent[0] === 'm') {
                     move(eachEvent);
 
@@ -181,26 +141,20 @@ var engine = (function() {
                     scroll(eachEvent);
 
                 } else if (eachEvent[0] === 'k') {
-                    keypress(eachEvent, _context.index);
+                    keypress(eachEvent, i);
 
                 } else if (eachEvent[0] === 'c') {
                     click(eachEvent);
 
                 } else if(eachEvent[0] === 'i') {
-                    input(eachEvent, _context.index);
+                    input(eachEvent, i);
                 }
-                _context.index++;
+                i++;
             }
-            _context.time += 10;
-        }, 10)
+            time += 10;
+        }, 10);
 
 
-    }
-
-    function resetContext() {
-        _context.index = 0;
-        _context.time = 0;
-        _context.timer = null;
     }
 
     function around(now, t) {
@@ -215,16 +169,15 @@ var engine = (function() {
     }
 
     function scroll(event) {
-        _iframe.contentWindow.scroll(event[1], event[2]);
+        window.scroll(event[1], event[2]);
         console.log('scroll to', event);
     }
 
-    /* need index to search forward to find the input element */
     function input(event, index) {
         var inputElement = null;
         for (var i = index; i >= 0; i--) {
             if(_session.d[i][0] === 'c') {
-                inputElement = _iframe.contentDocument.querySelector(_session.d[i][3]);
+                inputElement = document.querySelector(_session.d[i][3]);
                 break;
             }
         }
@@ -235,39 +188,34 @@ var engine = (function() {
 
 
     function click(event) {
-        // create clickPoint wrapper if there isnt one.
-        var wrapper = _iframe.contentDocument.getElementsByClassName('click-point-wrapper');
+        var wrapper = document.getElementsByClassName('click-point-wrapper');
         if(wrapper.length === 0) {
-            var wrapper = document.createElement('div');
-            wrapper.className = "click-point-wrapper"
+            wrapper = document.createElement('div');
+            wrapper.className = "click-point-wrapper";
         } else {
             wrapper = wrapper[0];
         }
-        // style checkPoint
         var clickPoint = document.createElement('div');
         clickPoint.style.position = "absolute";
         clickPoint.style.zIndex = 99999999;
         clickPoint.style.width = _clickPointSize;
         clickPoint.style.height = _clickPointSize;
         clickPoint.style.backgroundColor = "red";
-        clickPoint.style.opacity = 0.6;
         clickPoint.style.borderRadius = "50%";
         clickPoint.style.left = event[1] + 'px';
         clickPoint.style.top = event[2] + 'px';
         clickPoint.className = "click-point";
 
         wrapper.appendChild(clickPoint);
-        _iframe.contentDocument.body.appendChild(wrapper);
+        document.body.appendChild(wrapper);
 
-        // simulate user click, focus and dispatch click event
-        var clickTarget = _iframe.contentDocument.querySelector(event[3]);
+        var clickTarget = document.querySelector(event[3]);
         if(clickTarget) {
             clickTarget.focus();
 
-            // ele.click() fn only works for certain element types, like input
             clickTarget.click();
             if(clickTarget.nodeName === "LABEL" && clickTarget.attributes['for']) {
-                _iframe.contentDocument.getElementById(clickTarget.attributes['for'].nodeValue).focus()
+                document.getElementById(clickTarget.attributes['for'].nodeValue).focus();
 
             }
         } else {
@@ -277,12 +225,11 @@ var engine = (function() {
 
     }
 
-    /* util */
     if (!Array.prototype.last) {
         Array.prototype.last = function() {
             return this[this.length - 1];
         };
-    };
+    }
 
     if (!Object.assign) {
         Object.defineProperty(Object, 'assign', {
@@ -319,15 +266,58 @@ var engine = (function() {
 
     API.init = init;
     API.play = play;
-    API.pause = pause;
-    API.stop = stop;
 
-    //debug
-    API.iframe = function() {
-        return _iframe;
-    };
     return API;
 
 
 
 })();
+
+(function (engine) {
+	var _session = null;
+
+	$.get('http://localhost:9000/events')
+		.done(function(data) {
+			var id = data[data.length -1]['i'];
+			$.get('http://localhost:9000/sessions/' + id )
+				.done(function(sessionData) {
+					_session = sessionData;
+					engine.init(sessionData)
+				})
+		});
+
+
+	var wrapper = document.createElement('div');
+	wrapper.style.position = 'fixed';
+	wrapper.style.width = "200px";
+	wrapper.style.top = "0";
+	wrapper.style.left = "0";
+	wrapper.style.zIndex = 9999;
+
+	wrapper.style.backgroundColor = "#eee";
+
+
+	var playBtn = document.createElement('button');
+	playBtn.style.width = "40px";
+	playBtn.style.height = "34px";
+	playBtn.style.margin = "auto";
+	playBtn.textContent = "Play";
+
+	wrapper.appendChild(playBtn);
+	document.body.appendChild(wrapper);
+
+
+	playBtn.addEventListener('click', function(e) {
+		if(_session.m.url !== window.location.href) {
+			alert('you should be at ' + _session.m.url);
+		} else {
+			engine.play()
+		}
+	});
+
+
+
+
+
+
+})(engine);

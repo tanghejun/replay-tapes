@@ -60,12 +60,16 @@
             				'<li>URL: {{meta.url}}</li>'+
             				'<li>Window Size: {{meta.size}}</li>'+
             			'</ul>'+
-            			'<button ng-click="play()" ng-disabled="loading">play</button>' +
-            			'<button ng-click="play(2)" ng-disabled="loading">x2</button>' +
+            			'<button ng-click="play()" ng-disabled="loading || playing">play</button>' +
+            			'<button ng-click="pause()" ng-disabled="loading">pause</button>' +
+            			'<button ng-click="stop()" ng-disabled="loading">stop</button>' +
             		  '</div>',
             link: function(scope, element) {
-                scope.play = engine.play;
+                scope.play = play;
+                scope.pause = pause;
+                scope.stop = stop;
                 scope.loading = true;
+                scope.playing = false;
                 scope.meta = null;
                 activate();
 
@@ -87,6 +91,21 @@
                 		scope.$apply();
                 	}, false)
                 }
+
+                function play() {
+                	engine.play();
+                	scope.playing = true;
+                }
+
+                function pause() {
+                	engine.pause();
+                	scope.playing = false;
+                }
+
+				function stop() {
+                	engine.stop();
+                	scope.playing = false;
+                }                
             }
         }
     }
