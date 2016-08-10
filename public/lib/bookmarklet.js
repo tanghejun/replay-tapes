@@ -289,7 +289,6 @@ var engine = (function() {
 
 	var wrapper = document.createElement('div');
 	wrapper.style.position = 'fixed';
-	wrapper.style.width = "200px";
 	wrapper.style.top = "0";
 	wrapper.style.left = "0";
 	wrapper.style.zIndex = 9999;
@@ -298,22 +297,44 @@ var engine = (function() {
 
 
 	var playBtn = document.createElement('button');
-	playBtn.style.width = "40px";
+	playBtn.style.width = "55px";
 	playBtn.style.height = "34px";
 	playBtn.style.margin = "auto";
 	playBtn.textContent = "Play";
 
-	wrapper.appendChild(playBtn);
-	document.body.appendChild(wrapper);
+	var pauseBtn = document.createElement('button');
+	pauseBtn.style.width = "55px";
+	pauseBtn.style.height = "34px";
+	pauseBtn.style.margin = "auto";
+	pauseBtn.textContent = "Pause";
 
+	var stopBtn = document.createElement('button');
+	stopBtn.style.width = "55px";
+	stopBtn.style.height = "34px";
+	stopBtn.style.margin = "auto";
+	stopBtn.textContent = "Stop";
+
+	wrapper.appendChild(playBtn);
+	wrapper.appendChild(pauseBtn);
+	wrapper.appendChild(stopBtn);
+	document.body.appendChild(wrapper);
 
 	playBtn.addEventListener('click', function(e) {
 		if(_session.m.url !== window.location.href) {
 			alert('you should be at ' + _session.m.url);
 		} else {
-			engine.play()
+			engine.play();
 		}
 	});
+
+	pauseBtn.addEventListener('click', function(e) {
+		engine.pause();
+	});
+
+	stopBtn.addEventListener('click', function(e) {
+		engine.stop();
+	});
+
 
 
 

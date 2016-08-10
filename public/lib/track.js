@@ -8,7 +8,8 @@ var itrack = (function(w, $) {
         eventsApi = server + '/events',
         guid,
         sendInterval = 5000, // try to send to server every 5s.
-        throttleInterval = 100;
+        throttleInterval = 100,
+        _timer = null;
 
     /**
      * get browser meta including:
@@ -125,7 +126,7 @@ var itrack = (function(w, $) {
         var arr = [];
 
         if (e.type === eventsToTrack[0]) {
-            var encodedCssSelector = btoa($(e.target).getPath());
+            var encodedCssSelector = btoa(unescape(encodeURIComponent($(e.target).getPath())));
 
             // timeStamp could be very precise, we only need it to be milisecond.
             arr.push('c', e.pageX, e.pageY, encodedCssSelector, parseInt(e.timeStamp));
@@ -183,7 +184,7 @@ var itrack = (function(w, $) {
      */
     function store() {
 
-        setInterval(function() {
+        _storeTimer = setInterval(function() {
 
             //save length before sending, splice it after async operation succeeds.
             var sendLength = _events.length;
@@ -213,11 +214,23 @@ var itrack = (function(w, $) {
             console.info('iTrack not enabled');
         } else {
             console.info('iTrack enabled');
+            clearInterval(_clearTimer);
             guid = generateUUID(); // only generate once for one session.
             storeMeta();
             track();
             store();
         }
+    }
+
+    // stop tracking, actually tracking is still on, but just not storing it. and periodically clear the array
+    // to release memory.
+    function stop() {
+        clearInterval(_timer);
+        _clearTimer = setInterval(function() {
+            if(_events.length > 500) {
+                _events = [];
+            }
+        }, sendInterval);
     }
 
     function print() {
@@ -261,6 +274,10 @@ var itrack = (function(w, $) {
 
     //debug
     itrack.print = print;
+
+    // api
+    itrack.init = init;
+    itrack.stop = stop;
 
     return itrack;
 

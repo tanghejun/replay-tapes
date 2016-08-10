@@ -30,7 +30,7 @@ var engine = (function() {
             arr[arr.length - 1] = parseInt(arr.last())
             // decode element selector for click data
             if(arr[0] === 'c') {
-                arr[3] = atob(arr[3]);
+                arr[3] = decodeURIComponent(escape(atob(arr[3])));
             }
             return arr;
         })
