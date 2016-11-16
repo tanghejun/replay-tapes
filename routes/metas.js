@@ -1,46 +1,24 @@
-var express = require('express');
-var router = express.Router();
-var db = require('../db')
-
-/* GET home page. */
-
-
-router.get('/:id', function(req, res, next) {
-    console.log(req.params.id);
-    var collection = db.get().collection('meta');
-    collection.findOne({ i: req.params.id }, {"_id": 0}, function(err, result) {
-        if (result) {
-            res.send(result)
-        } else {
-	        res.sendStatus(404)
-        }
-    })
-});
-
-router.get('/', function(req, res, next) {
-    var collection = db.get().collection('meta');
-    collection.find({}, {"_id": 0}).toArray(function(err, result) {
-        res.json(result);
-    })
-
-})
+const router = require('express').Router()
+const db = require('../db')
 
 router.post('/', function(req, res, next) {
-    console.log(req.body);
-
-    if (req.body.i) {
-        var collection = db.get().collection('meta');
-        collection.insertOne(req.body, function(err, result) {
-            if (err) {
-            	res.send(err)
-            } else {
-	            console.log('insert meta ok');
-            }
+    console.log(req.body)
+    let { i, m } = req.body
+    if (i && m) {
+        db.get((err, conn) => {
+            conn.collection('session').update(
+                { _id: i},
+                { $set: { meta: m, time: +new Date() } },
+                { upsert: true },
+                (err, data) => {
+                    if(err) return res.send(err)
+                    return res.send(200)
+                }
+            )
         })
     } else {
-        res.sendStatus(500)
+        res.sendStatus(400)
     }
-
 });
 
 module.exports = router;

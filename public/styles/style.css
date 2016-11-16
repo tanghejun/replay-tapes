@@ -11,3 +11,10 @@ player>div>button {
 	width: 100px;
 	height: 34px;
 }
+
+.session-list li{
+	cursor: pointer;
+}
+.session-list li:hover{
+	text-decoration: underline;
+}

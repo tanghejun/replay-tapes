@@ -6,7 +6,7 @@ var itrack = (function(w, $) {
         // listen to mouseup instead of click since click has greater chance to be canceled bubbling.
         // still, we can set 'useCapture=true', but not all browsers support that.
         eventsToTrack = ['click', 'scroll', 'mousemove'],
-        server = 'http://localhost:9000',
+        server = 'http://localhost',
         metaApi = server + '/metas',
         eventsApi = server + '/events',
         guid,
@@ -18,7 +18,7 @@ var itrack = (function(w, $) {
     /**
      * get browser meta including:
      * userAgent, current url, window content size.
-     * 
+     *
      * @return {Object}
      */
     function getMeta() {
@@ -37,7 +37,7 @@ var itrack = (function(w, $) {
     /**
      * get browser meta data and send to server.
      *
-     * format: 
+     * format:
      * {
      *     i: guid,
      *     m: meta
@@ -74,7 +74,7 @@ var itrack = (function(w, $) {
 
     /* simple implementation of get element's selector path,
     http://stackoverflow.com/questions/2068272/getting-a-jquery-selector-for-an-element
-    consider using a lib like: 
+    consider using a lib like:
     https://github.com/autarc/optimal-select */
     jQuery.fn.getPath = function () {
         if (this.length != 1) throw 'Requires one element.';
@@ -100,8 +100,8 @@ var itrack = (function(w, $) {
             if (realNode.id) {
                 // As soon as an id is found, there's no need to specify more.
                 return name + '#' + realNode.id + (path ? '>' + path : '');
-            } else if (realNode.className) {
-                name += '.' + realNode.className.split(/\s+/).join('.');
+            } else if (realNode.className.trim()) {
+                name += '.' + realNode.className.trim().split(/\s+/).join('.');
             }
             var parent = node.parent(), siblings = parent.children(name);
             var nthChild = siblings.index(node) + 1;
@@ -118,12 +118,12 @@ var itrack = (function(w, $) {
 
     /**
      * extract event specific data and construct it into a minimal string to save bandwidth;
-     * 
+     *
      * format:
      * click    c, pageX, pageY, element selector, timeStamp
      * keypress k, keyCode, timeStamp
      * scroll   s, scrollX, scollY, timeStamp
-     * 
+     *
      * @param  {Event} original event
      * @return {Object} obj contains event specific data
      */
@@ -143,7 +143,7 @@ var itrack = (function(w, $) {
             if(targetNode === "SELECT" || targetNode === "TEXTAREA" || (e.target.nodeName === "INPUT" && e.target.type !== "password")) {
                 e.target.addEventListener('input', inputEventHandler);
             }
-            
+
         } else if (e.type === eventsToTrack[1]) {
             var encodedCssSelector = "";
             if(e.target === w.document) {
@@ -192,10 +192,10 @@ var itrack = (function(w, $) {
     /**
      * send data every other time to server if any
      * object format:
-     * { 
+     * {
      *   i: guid,
      *   d: event data
-     * }    
+     * }
      */
     function store() {
 
@@ -222,10 +222,17 @@ var itrack = (function(w, $) {
             }
         }, sendInterval)
     }
+    function inIframe () {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
 
     function init() {
         //note: if no parent window, w.parent equal to itself.
-        if((w.parent !== w)  && !w.parent.ITRACK_ENABLED) {
+        if(inIframe()) {
             console.info('iTrack not enabled');
         } else {
             console.info('iTrack enabled');
@@ -296,4 +303,4 @@ var itrack = (function(w, $) {
 
     return itrack;
 
-})(window, jQuery)
+})(window, $)

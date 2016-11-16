@@ -15,16 +15,14 @@ var engine = (function() {
 
     function init(session, wrapper) {
         prepareSession(session);
-        createFrame(wrapper);
-        drawMouse();
-
+        _iframe = createFrame(wrapper);
     }
 
     function prepareSession(session) {
         checkSession(session);
 
         // resolve comma separated data into array
-        var result = session.d.map(function(action) {
+        var result = session.events.map(function(action) {
             var arr = action.split(',');
             // parse timeStamp
             arr[arr.length - 1] = parseInt(arr.last());
@@ -34,14 +32,12 @@ var engine = (function() {
             }
             return arr;
         })
-        session.d = result;
+        session.events = result;
 
         // for unknown reason, when scroll with mousemove, there's some chance the latter event captured before the previous one. so order them by timeStamp before storing them.
-        session.d.sort(function(a, b) {
+        session.events.sort(function(a, b) {
             return a.last() - b.last();
         });
-
-        console.debug(session.d)
 
         _session = session;
     }
@@ -52,7 +48,7 @@ var engine = (function() {
         }
 
         /* check meta/data/id */
-        if (!s.i || !s.m || !s.d) {
+        if (!s._id || !s.meta || !s.events) {
             throw "corrupted session data"
         }
         /* maybe more check later, like time sequence, data format */
@@ -63,24 +59,33 @@ var engine = (function() {
 
 
     function createFrame(wrapper) {
-        var src = _session.m.url;
-        var w = _session.m.size.split(',')[0]
-        var h = _session.m.size.split(',')[1]
+        if(_iframe) {
+            _iframe.parentNode.removeChild(_iframe)
+        }
+        var src = _session.meta.url;
+        var w = _session.meta.size.split(',')[0]
+        var h = _session.meta.size.split(',')[1]
 
         var iframe = document.createElement('iframe');
-        iframe.src = _session.m.url;
+        iframe.onload = function() {
+            // emit events to outside world.
+            console.info('iTrackFrameLoaded');
+            window.dispatchEvent(new Event('iTrackFrameLoaded'));
+            _mouse = drawMouse();
+            iframe.contentDocument.body.appendChild(_mouse);
+        }
+        iframe.src = _session.meta.url;
         iframe.width = w;
         iframe.height = h;
         iframe.className = _iframeClass;
 
         document.body.appendChild(iframe);
-        _iframe = iframe;
         return iframe;
     }
 
 
     function drawMouse() {
-        _mouse = document.createElement('div')
+        var mouse = document.createElement('div')
 
         var pointer = document.createElement('div')
         pointer.style.position = "absolute";
@@ -102,25 +107,14 @@ var engine = (function() {
         clickHinter.style.borderRadius = '50%';
         clickHinter.style.backgroundColor = 'yellow';
 
-        _mouse.style.position = "absolute";
-        _mouse.style.zIndex = 9999998;
-        _mouse.style.left = "10px";
-        _mouse.style.top = "10px";
+        mouse.style.position = "absolute";
+        mouse.style.zIndex = 9999998;
+        mouse.style.left = "10px";
+        mouse.style.top = "10px";
 
-        _mouse.appendChild(clickHinter);
-        _mouse.appendChild(pointer);
-
-        _iframe.contentWindow.addEventListener('DOMContentLoaded', function() {
-            // emit events to outside world.
-            console.info('iTrackFrameContentLoaded');
-            window.dispatchEvent(new Event('iTrackFrameContentLoaded'));
-            _iframe.contentDocument.body.appendChild(_mouse);
-        }, false)
-        _iframe.contentWindow.addEventListener('load', function() {
-            // emit events to outside world.
-            console.info('iTrackFrameLoaded');
-            window.dispatchEvent(new Event('iTrackFrameLoaded'));
-        }, false)
+        mouse.appendChild(clickHinter);
+        mouse.appendChild(pointer);
+        return mouse;
     }
 
     function pause() {
@@ -148,7 +142,7 @@ var engine = (function() {
 
     function play(speed) {
         var mySession = Object.assign({}, _session);
-        console.log('_session', _session.d);
+        // console.log('_session', _session.d);
         // console.log('before',mySession.d[0]);
         speed = speed || 1;
         if (typeof speed !== 'number' || speed !== speed) {
@@ -159,22 +153,22 @@ var engine = (function() {
         }
 
         if (speed !== 1) {
-            var data = mySession.d.map(function(eachEvent) {
+            var data = mySession.events.map(function(eachEvent) {
                 eachEvent[eachEvent.length - 1] /= speed;
                 return eachEvent;
             })
-            mySession.d = data;
+            mySession.events = data;
         }
 
         // play logic
-        var length = mySession.d.length;
+        var length = mySession.events.length;
 
         _context.timer = setInterval(function() {
             if (_context.index === length) {
                 stop();
                 return;
             }
-            var eachEvent = mySession.d[_context.index];
+            var eachEvent = mySession.events[_context.index];
             if (around(_context.time, eachEvent.last())) {
                 if (eachEvent[0] === 'm') {
                     move(eachEvent);
@@ -236,8 +230,8 @@ var engine = (function() {
     function findLastScrollSelector(index) {
         var selector = null;
         for (var i = index; i >= 0; i--) {
-            if (_session.d[i][0] === 's' && _session.d[i].length === 5) {
-                selector = _session.d[i][3];
+            if (_session.events[i][0] === 's' && _session.events[i].length === 5) {
+                selector = _session.events[i][3];
                 break;
             }
         }
@@ -248,8 +242,8 @@ var engine = (function() {
     function input(event, index) {
         var inputElement = null;
         for (var i = index; i >= 0; i--) {
-            if (_session.d[i][0] === 'c') {
-                inputElement = _iframe.contentDocument.querySelector(_session.d[i][3]);
+            if (_session.events[i][0] === 'c') {
+                inputElement = _iframe.contentDocument.querySelector(_session.events[i][3]);
                 break;
             }
         }

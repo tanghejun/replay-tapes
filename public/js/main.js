@@ -1,16 +1,24 @@
 (function() {
+document.domain = 'baixing.cn';
 
     angular.module('itrack', [])
         .controller('Ctrl', Ctrl)
-        // .factory('engine', engine)
         .factory('session', session)
-        .factory('event', event)
         .directive('player', player);
 
-    Ctrl.$inject = [];
+    Ctrl.$inject = ['session'];
 
-    function Ctrl() {
-        console.log('in ctrl');
+    function Ctrl(session) {
+        var ctrl = this;
+        session.query().then(function(d) {
+            ctrl.sessions = d.data;
+        })
+
+        ctrl.load = function(id) {
+            console.log(ctrl.sessions);
+            console.log(id);
+            ctrl.session = ctrl.sessions[id]
+        }
     }
 
 
@@ -18,43 +26,31 @@
 
     function session($http) {
         var api = {
-            get: getSession
+            get: getSession,
+            query: querySession
         };
 
         function getSession(id) {
             return $http.get('/sessions/' + id)
         }
-
-        return api;
-    }
-
-
-    event.$inject = ['$http'];
-
-    function event($http) {
-        var api = {
-            get: getEvent,
-            list: listEvents
-        };
-
-        function getEvent(id) {
-            return $http.get('/events/' + id)
-        }
-
-        function listEvents() {
-            return $http.get('/events');
+        function querySession(query) {
+            return $http.get('/sessions')
         }
 
         return api;
     }
 
-    player.$inject = ['event', 'session', '$window'];
 
-    function player(event, session, $window) {
+    player.$inject = ['session', '$window'];
+
+    function player(session, $window) {
         return {
             restrict: 'E',
+            scope: {
+                session: '='
+            },
             template: '<div>'+
-            			'<p ng-hide="meta">loading...</p>'+
+            			'<p ng-hide="meta">select one session</p>'+
             			'<ul ng-show="meta">'+
             				'<li>User Agent: {{meta.ua}}</li>'+
             				'<li>URL: {{meta.url}}</li>'+
@@ -76,14 +72,11 @@
                 //================
 
                 function activate() {
-                    event.list().then(function(data) {
-                        var length = data.data.length;
-                        session.get(data.data[length - 1].i)
-                            .then(function(sdata) {
-                                var session = sdata.data;
-                                scope.meta = session.m;
-                                engine.init(session, element);
-                            })
+                    scope.$watch('session', function(newv, oldv) {
+                        if(newv) {
+                            scope.meta = newv.m;
+                            engine.init(newv, element)
+                        }
                     })
 
                 	$window.addEventListener('iTrackFrameLoaded', function(e) {
@@ -105,32 +98,9 @@
 				function stop() {
                 	engine.stop();
                 	scope.playing = false;
-                }                
+                }
             }
         }
     }
 
-
-
-    // engine.$inject = ['session', 'event'];
-    // function engine(session, event) {
-    //     var api = {
-    //         init: init
-    //     };
-
-    //     function init() {
-    //     	event.list().then(function(data) {
-    //     		var length = data.data.length;
-    //     		session.get(data.data[length -1].i)
-    //     			.then(function(data1) {
-    //     				var sessionData = data1.data;
-    //     				engine.init(ses)
-    //     			})
-    //     	})
-    //         // engine.init();
-    //     }
-
-
-    //     return api;
-    // }
 })()

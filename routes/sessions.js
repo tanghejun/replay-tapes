@@ -1,37 +1,41 @@
-var express = require('express');
-var router = express.Router();
-var db = require('../db')
+const db = require('../db')
+const router = require('express').Router()
 
-/* GET home page. */
-router.get('/:id', function(req, res, next) {
-    if(req.params.id) {
-        console.log(req.params.id);
-        var metaCollection = db.get().collection('meta');
-        var eventCollection = db.get().collection('events');
-        metaCollection.findOne({i: req.params.id}, function(err, result) {
-            if(result) {
-                eventCollection.findOne({i: req.params.id}, function(err1, result1) {
-                    if(result1) {
-                        // both meta and events for the id exists, compose them to be a session.
-                        var session = {
-                            i: result.i,
-                            m: result.m,
-                            d: result1.d
-                        };
-                        res.send(session);
-                    } else {
-                        res.sendStatus(404)
-                    }
-                })
+// get one session
+router.get('/:sessionId', (req, res) => {
+    db.get((err, conn) => {
+        let { sessionId } = req.params;
+        conn.collection('session').findOne({ _id: Number(sessionId) }, (err, data) => {
+            if (data) {
+                res.json(data)
             } else {
-                res.sendStatus(404);
+                res.sendStatus(404)
             }
-        });
-    } else {
-        res.sendStatus(404)
-        
+        })
+    })
+})
+
+// query sessions
+router.get('/', (req, res) => {
+    db.get((err, conn) => {
+        conn.collection('session')
+            .find(toInt(req.query), { sort: { time: -1 }, limit: 10 })
+            .toArray((err, data) => {
+                if (data) {
+                    res.json(data)
+                } else {
+                    res.sendStatus(404)
+                }
+            })
+    })
+})
+
+function toInt(obj) {
+    for (key in obj) {
+        let n = Number(obj[key])
+        if (isNaN(n)) continue;
+        obj[key] = n;
     }
-});
-
-
+    return obj;
+}
 module.exports = router;

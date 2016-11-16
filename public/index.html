@@ -6,14 +6,18 @@
 	<link rel="stylesheet" type="text/css" href="./styles/style.css">
 </head>
 <body ng-app="itrack" ng-controller="Ctrl as Main">
-<h1>Replay Engine</h1>
+<h1>Sessions ({{Main.sessions.length}})</h1>
+<ul class="session-list">
+	<li ng-repeat="session in Main.sessions track by $index" ng-click="Main.load($index)" title={{session._id}}>
+	 	<!-- <a ng-href="{{session.meta.url}}?replay_session_id={{session._id}}">{{session.time | date: 'short'}}</a> -->
+	 	{{session.time | date: 'short'}}
+	</li>
+</ul>
 
-<player></player>
+<h1>Replay Engine</h1>
+<player session="Main.session"></player>
 
 <script src="node_modules/angular/angular.js"></script>
-<script>
-	window.ITRACK_ENABLED = false;
-</script>
 <script src="lib/engine.js"></script>
 <script src="js/main.js"></script>
 

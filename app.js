@@ -13,6 +13,15 @@ var sessions = require('./routes/sessions');
 
 var app = express();
 
+// Connect to Mongo on start
+db.get((err, conn) => {
+  if(err) {
+    console.log(err);
+  } else {
+    console.log('connected to mongodb');
+  }
+})
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -32,15 +41,6 @@ app.use('/events', events);
 app.use('/sessions', sessions);
 
 
-// Connect to Mongo on start
-db.connect('mongodb://localhost:27017/itrack', function(err) {
-  if (err) {
-    console.log('Unable to connect to Mongo.')
-    process.exit(1)
-  }else {
-    console.log('connected to db.');
-  }
-})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
