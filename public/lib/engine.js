@@ -142,8 +142,6 @@ var engine = (function() {
 
     function play(speed) {
         var mySession = Object.assign({}, _session);
-        // console.log('_session', _session.d);
-        // console.log('before',mySession.d[0]);
         speed = speed || 1;
         if (typeof speed !== 'number' || speed !== speed) {
             throw 'speed should be a number';
@@ -200,7 +198,7 @@ var engine = (function() {
     }
 
     function around(now, t) {
-        console.log('now', now);
+        console.log('now', parseFloat(now / 1000));
         return Math.abs(now - t) <= 11;
     }
 

@@ -1,20 +1,64 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 50px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: #00B7FF;
+md-grid-list {
+    margin: 8px;
 }
 
-player>div>button {
-	width: 100px;
-	height: 34px;
+.gray {
+    background: #f5f5f5;
 }
 
-.session-list li{
-	cursor: pointer;
+.green {
+    background: #b9f6ca;
 }
-.session-list li:hover{
-	text-decoration: underline;
+
+.yellow {
+    background: #ffff8d;
+}
+
+.blue {
+    background: #84ffff;
+}
+
+.purple {
+    background: #b388ff;
+}
+
+.red {
+    background: #ff8a80;
+}
+
+md-grid-tile {
+    transition: all 400ms ease-out 50ms;
+}
+.events-num {
+    font-size: 20px;
+    text-align: center;
+}
+
+.chips-wrapper {
+    position: relative;
+    padding-left: 36px;
+    margin: 18px 0;
+}
+.tag-icon {
+    position: absolute;
+    left: 2px;
+    top: 15px;
+}
+.search-result {
+    position: relative;
+}
+.loading {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(250, 250, 250);
+    z-index: 1;
+}
+.message {
+    margin-left: 16px;
 }

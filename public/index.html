@@ -1,25 +1,61 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>Replay</title>
-	<link rel="icon" type="image/x-icon" href="./favicon.ico">
-	<link rel="stylesheet" type="text/css" href="./styles/style.css">
+    <title>Tape Store</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="stylesheet" href="/node_modules/angular-material/angular-material.css">
+    <link rel="stylesheet" type="text/css" href="./styles/style.css">
 </head>
-<body ng-app="itrack" ng-controller="Ctrl as Main">
-<h1>Sessions ({{Main.sessions.length}})</h1>
-<ul class="session-list">
-	<li ng-repeat="session in Main.sessions track by $index" ng-click="Main.load($index)" title={{session._id}}>
-	 	<!-- <a ng-href="{{session.meta.url}}?replay_session_id={{session._id}}">{{session.time | date: 'short'}}</a> -->
-	 	{{session.time | date: 'short'}}
-	</li>
-</ul>
 
-<h1>Replay Engine</h1>
-<player session="Main.session"></player>
+<body ng-app="tapeStore">
+    <div ng-controller="Ctrl as Main" ng-cloak>
+        <h1>Find the tape</h1>
+        <div layout="row" layout-xs="column">
+            <div flex="30">
+                <div layout="column" layout-align="space-between stretch">
+                    <div>
+                        <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
+                        <md-button ng-click="Main.date = null">clear</md-button>
+                    </div>
+                    <div class="chips-wrapper">
+                        <md-icon md-svg-src="images/tag.svg" class="tag-icon"></md-icon>
+                        <md-chips ng-model="Main.tags" placeholder="Enter a tag" readonly="false" md-removable="true" md-enable-chip-edit="true" secondary-placeholder="+Tag"></md-chips>
+                    </div>
+                    <md-input-container>
+                        <label>User ID/ Track ID</label>
+                        <md-icon md-svg-src="images/user.svg" class="name"></md-icon>
+                        <input ng-model="Main.userId">
+                    </md-input-container>
 
-<script src="node_modules/angular/angular.js"></script>
-<script src="lib/engine.js"></script>
-<script src="js/main.js"></script>
-
+                    <md-button class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
+                </div>
+            </div>
+            <div flex flex-offset="10" class="search-result">
+                <md-list>
+                    <md-subheader class="md-no-sticky">Search Results:</md-subheader>
+                    <div layout="row" layout-sm="column" layout-align="space-around center" class="loading"  ng-if="Main.loading">
+                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                    </div>
+                    <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
+                    <md-list-item class="md-3-line" ng-repeat="tape in Main.tapes">
+                        <md-icon class="md-avatar-icon events-num">{{tape.events.length || 0}}</md-icon>
+                        <div class="md-list-item-text" layout="column">
+                            <h3><a title="{{tape._id}}" href="{{tape.meta.url}}?replay_session_id={{tape._id}}">{{tape.meta.url}}</a></h3>
+                            <h4>tags: {{tape.meta.tags.join(', ')}}</h4>
+                            <p>user: {{tape.meta.userId || tape.meta.trackId}}</p>
+                            <p>record at: {{tape.time | date: 'short'}}</p>
+                        </div>
+                    </md-list-item>
+                </md-list>
+            </div>
+        </div>
+    </div>
+    <script src="node_modules/angular/angular.js"></script>
+    <script src="/node_modules/angular-aria/angular-aria.js"></script>
+    <script src="/node_modules/angular-animate/angular-animate.js"></script>
+    <script src="/node_modules/angular-material/angular-material.js"></script>
+    <script src="js/main.js"></script>
 </body>
+
 </html>

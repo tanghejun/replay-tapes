@@ -1,106 +1,64 @@
 (function() {
-document.domain = 'baixing.cn';
-
-    angular.module('itrack', [])
+    angular.module('tapeStore', ['ngMaterial'])
         .controller('Ctrl', Ctrl)
         .factory('session', session)
-        .directive('player', player);
 
-    Ctrl.$inject = ['session'];
+    Ctrl.$inject = ['session']
 
     function Ctrl(session) {
-        var ctrl = this;
-        session.query().then(function(d) {
-            ctrl.sessions = d.data;
-        })
+        var ctrl = this
+        ctrl.minDate = new Date(2016, 10, 10)
+        ctrl.maxDate = new Date(2017, 10, 10)
+        ctrl.date = new Date()
+        ctrl.tags = []
+        ctrl.userId = ''
 
-        ctrl.load = function(id) {
-            console.log(ctrl.sessions);
-            console.log(id);
-            ctrl.session = ctrl.sessions[id]
+        ctrl.search = searchTapes;
+
+
+        function searchTapes() {
+            var queryObj = {}
+            queryObj.tags = ctrl.tags.join(',')
+            queryObj.userId = ctrl.userId.trim()
+            queryObj.time = ctrl.date ? ctrl.date.getTime() : ''
+
+            ctrl.loading = true
+            session.query(queryObj).then(function(data) {
+                ctrl.tapes = data.data
+                if(ctrl.tapes.length === 0) {
+                    ctrl.message = 'Sorry, records not found.'
+                }
+            }).catch(function(err) {
+                ctrl.message = err.message
+            }).finally(function() {
+                ctrl.loading = false
+            })
         }
     }
 
 
-    session.$inject = ['$http'];
+    session.$inject = ['$http', '$httpParamSerializer']
 
-    function session($http) {
+    function session($http, $httpParamSerializer) {
+        var endpoint = 'http://localhost/'
         var api = {
             get: getSession,
             query: querySession
-        };
+        }
 
         function getSession(id) {
-            return $http.get('/sessions/' + id)
+            return $http.get(endpoint + 'sessions/' + id)
         }
         function querySession(query) {
-            return $http.get('/sessions')
+            var result = $httpParamSerializer(query)
+            console.log(result);
+            return $http.get(endpoint + 'sessions?' + result)
         }
 
-        return api;
+        return api
     }
 
 
-    player.$inject = ['session', '$window'];
 
-    function player(session, $window) {
-        return {
-            restrict: 'E',
-            scope: {
-                session: '='
-            },
-            template: '<div>'+
-            			'<p ng-hide="meta">select one session</p>'+
-            			'<ul ng-show="meta">'+
-            				'<li>User Agent: {{meta.ua}}</li>'+
-            				'<li>URL: {{meta.url}}</li>'+
-            				'<li>Window Size: {{meta.size}}</li>'+
-            			'</ul>'+
-            			'<button ng-click="play()" ng-disabled="loading || playing">play</button>' +
-            			'<button ng-click="pause()" ng-disabled="loading">pause</button>' +
-            			'<button ng-click="stop()" ng-disabled="loading">stop</button>' +
-            		  '</div>',
-            link: function(scope, element) {
-                scope.play = play;
-                scope.pause = pause;
-                scope.stop = stop;
-                scope.loading = true;
-                scope.playing = false;
-                scope.meta = null;
-                activate();
-
-                //================
-
-                function activate() {
-                    scope.$watch('session', function(newv, oldv) {
-                        if(newv) {
-                            scope.meta = newv.m;
-                            engine.init(newv, element)
-                        }
-                    })
-
-                	$window.addEventListener('iTrackFrameLoaded', function(e) {
-                		scope.loading = false;
-                		scope.$apply();
-                	}, false)
-                }
-
-                function play() {
-                	engine.play();
-                	scope.playing = true;
-                }
-
-                function pause() {
-                	engine.pause();
-                	scope.playing = false;
-                }
-
-				function stop() {
-                	engine.stop();
-                	scope.playing = false;
-                }
-            }
-        }
-    }
 
 })()
