@@ -10,13 +10,19 @@
 
 <body ng-app="tapeStore">
     <div ng-controller="Ctrl as Main" ng-cloak>
-        <h1>Find the tape</h1>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+              <h3>
+                <span>Find the tape</span>
+              </h3>
+            </div>
+          </md-toolbar>
         <div layout="row" layout-xs="column">
-            <div flex="30">
+            <div flex="100" flex-gt-xs="30">
                 <div layout="column" layout-align="space-between stretch">
                     <div>
                         <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
-                        <md-button ng-click="Main.date = null">clear</md-button>
+                        <md-button class="md-warn" ng-click="Main.date = null">clear</md-button>
                     </div>
                     <div class="chips-wrapper">
                         <md-icon md-svg-src="images/tag.svg" class="tag-icon"></md-icon>
@@ -31,15 +37,15 @@
                     <md-button class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
                 </div>
             </div>
-            <div flex flex-offset="10" class="search-result">
+            <div flex-offset-gt-xs="10"  flex-xs="100" flex-gt-xs="70" class="search-result">
                 <md-list>
-                    <md-subheader class="md-no-sticky">Search Results:</md-subheader>
+                    <md-subheader class="md-no-sticky">Search Results: {{Main.tapes.length || ''}}</md-subheader>
                     <div layout="row" layout-sm="column" layout-align="space-around center" class="loading"  ng-if="Main.loading">
                         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
                     </div>
                     <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
                     <md-list-item class="md-3-line" ng-repeat="tape in Main.tapes">
-                        <md-icon class="md-avatar-icon events-num">{{tape.events.length || 0}}</md-icon>
+                        <md-icon class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">{{tape.events.length || 0}}</md-icon>
                         <div class="md-list-item-text" layout="column">
                             <h3><a title="{{tape._id}}" href="{{tape.meta.url}}?replay_session_id={{tape._id}}">{{tape.meta.url}}</a></h3>
                             <h4>tags: {{tape.meta.tags.join(', ')}}</h4>

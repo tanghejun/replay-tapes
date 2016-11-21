@@ -1,5 +1,5 @@
 body {
-    padding: 50px;
+    /*padding: 50px;*/
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -41,12 +41,12 @@ md-grid-tile {
 
 .chips-wrapper {
     position: relative;
-    padding-left: 36px;
+    padding-left: 62px;
     margin: 18px 0;
 }
 .tag-icon {
     position: absolute;
-    left: 2px;
+    left: 16px;
     top: 15px;
 }
 .search-result {
@@ -61,4 +61,20 @@ md-grid-tile {
 }
 .message {
     margin-left: 16px;
+}
+
+md-toolbar {
+    margin-bottom: 20px;
+}
+
+md-input-container.md-icon-left {
+    padding-left: 62px;
+    padding-right: 0;
+}
+
+md-input-container.md-icon-left label {
+    left: 62px;
+}
+md-input-container > md-icon {
+    left: 16px;
 }
