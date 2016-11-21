@@ -2,9 +2,13 @@ const router = require('express').Router()
 const db = require('../db')
 
 router.post('/', function(req, res, next) {
-    console.log(req.body)
+    let { __u, __trackId } = req.cookies
     let { i, m } = req.body
     if (i && m) {
+
+        m.userId = __u
+        m.trackId = __trackId
+
         db.get((err, conn) => {
             conn.collection('session').update(
                 { _id: i},

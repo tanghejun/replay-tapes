@@ -40,7 +40,7 @@
     session.$inject = ['$http', '$httpParamSerializer']
 
     function session($http, $httpParamSerializer) {
-        var endpoint = 'http://localhost/'
+        var endpoint = 'http://localhost:3001/'
         var api = {
             get: getSession,
             query: querySession
