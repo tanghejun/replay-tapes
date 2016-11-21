@@ -40,19 +40,18 @@
     session.$inject = ['$http', '$httpParamSerializer']
 
     function session($http, $httpParamSerializer) {
-        var endpoint = 'http://localhost:3001/'
         var api = {
             get: getSession,
             query: querySession
         }
 
         function getSession(id) {
-            return $http.get(endpoint + 'sessions/' + id)
+            return $http.get('/sessions/' + id)
         }
         function querySession(query) {
             var result = $httpParamSerializer(query)
             console.log(result);
-            return $http.get(endpoint + 'sessions?' + result)
+            return $http.get('/sessions?' + result)
         }
 
         return api
