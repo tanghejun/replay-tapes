@@ -9,7 +9,7 @@ var itrack = (function(w, $) {
         metaApi = server + '/metas',
         eventsApi = server + '/events',
         guid,
-        sendInterval = 5000, // try to send to server every 5s.
+        sendInterval = 2000,
         throttleInterval = 100,
         _storeTimer = null,
         _clearTimer = null;
