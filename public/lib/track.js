@@ -1,16 +1,15 @@
 var itrack = (function(w, $) {
-
     var itrack = {},
         _events = [],
 
         // listen to mouseup instead of click since click has greater chance to be canceled bubbling.
         // still, we can set 'useCapture=true', but not all browsers support that.
         eventsToTrack = ['click', 'scroll', 'mousemove'],
-        server = 'http://localhost',
+        server = "http://d.admx.baixing.c"+"om:8885",
         metaApi = server + '/metas',
         eventsApi = server + '/events',
         guid,
-        sendInterval = 2000, // try to send to server every 5s.
+        sendInterval = 5000, // try to send to server every 5s.
         throttleInterval = 100,
         _storeTimer = null,
         _clearTimer = null;
@@ -43,11 +42,13 @@ var itrack = (function(w, $) {
      *     m: meta
      * }
      */
-    function storeMeta() {
+    function storeMeta(tags) {
+        var meta = getMeta();
+        meta.tags = tags;
         $.ajax({
             url: metaApi,
             type: 'POST',
-            data: JSON.stringify({ i: guid, m: getMeta() }),
+            data: JSON.stringify({ i: guid, m: meta }),
             contentType: "application/json",
             success: function(d) {
                 console.log('meta sent');
@@ -76,13 +77,13 @@ var itrack = (function(w, $) {
     http://stackoverflow.com/questions/2068272/getting-a-jquery-selector-for-an-element
     consider using a lib like:
     https://github.com/autarc/optimal-select */
-    jQuery.fn.getPath = function () {
+    $.fn.getPath = function () {
         if (this.length != 1) throw 'Requires one element.';
 
         var path, node = this;
         while (node.length) {
             var realNode = node[0];
-            var name = (
+            var tagName = (
 
                 // IE9 and non-IE
                 realNode.localName ||
@@ -92,6 +93,7 @@ var itrack = (function(w, $) {
                 realNode.nodeName
 
             );
+            var name = tagName;
 
             // on IE8, nodeName is '#document' at the top level, but we don't need that
             if (!name || name == '#document') break;
@@ -103,9 +105,11 @@ var itrack = (function(w, $) {
             } else if (realNode.className.trim()) {
                 name += '.' + realNode.className.trim().split(/\s+/).join('.');
             }
-            var parent = node.parent(), siblings = parent.children(name);
+            var parent = node.parent(),
+                siblings = parent.children(tagName),
+                classSiblings = parent.children(name);
             var nthChild = siblings.index(node) + 1;
-            if (siblings.length > 1) {
+            if (classSiblings.length > 1) {
                 name += ':nth-of-type(' + nthChild + ')';
             }
             path = name + (path ? '>' + path : '');
@@ -230,15 +234,15 @@ var itrack = (function(w, $) {
         }
     }
 
-    function init() {
+    function init(tags) {
         //note: if no parent window, w.parent equal to itself.
-        if(inIframe()) {
+        if(inIframe() || /replay_session_id/g.test(location.href)) {
             console.info('iTrack not enabled');
         } else {
             console.info('iTrack enabled');
             clearInterval(_clearTimer);
             guid = generateUUID(); // only generate once for one session.
-            storeMeta();
+            storeMeta(tags);
             track();
             store();
         }
@@ -290,7 +294,7 @@ var itrack = (function(w, $) {
 
 
     $(document).ready(function() {
-        init();
+        init(['mobile', 'homepage']);
     })
 
 
