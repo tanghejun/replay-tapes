@@ -45,12 +45,17 @@
                     </div>
                     <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
                     <md-list-item class="md-3-line" ng-repeat="tape in Main.tapes">
-                        <md-icon class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">{{tape.events.length || 0}}</md-icon>
+                        <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
+                            {{tape.events.length || 0}}
+                            <md-tooltip md-direction="left">
+                                {{tape.summary | json}}
+                            </md-tooltip>
+                        </md-icon>
                         <div class="md-list-item-text" layout="column">
-                            <h3><a title="{{tape._id}}" href="{{tape.meta.url}}?replay_session_id={{tape._id}}" target="_blank">{{tape.meta.url}}</a></h3>
-                            <h4>tags: {{tape.meta.tags.join(', ')}}</h4>
-                            <p>user: {{tape.meta.userId || tape.meta.trackId}}</p>
-                            <p>record at: {{tape.time | date: 'short'}}</p>
+                            <h3>Page: <a title="{{tape._id}}" href="{{tape.meta.url}}?replay_session_id={{tape._id}}" target="_blank">{{tape.meta.url}}</a></h3>
+                            <h4>Tags: {{tape.meta.tags.join(', ')}}</h4>
+                            <p>User: {{tape.meta.userId || tape.meta.trackId}}</p>
+                            <p>Duration: {{tape.duration | duration}}, record at: {{tape.time | date: 'short'}}</p>
                         </div>
                     </md-list-item>
                 </md-list>
