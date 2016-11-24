@@ -1,5 +1,5 @@
 (function() {
-    angular.module('tapeStore', ['ngMaterial'])
+    angular.module('tapeStore', ['ngMaterial', 'angularUtils.directives.dirPagination'])
         .controller('Ctrl', Ctrl)
         .factory('session', session)
         .filter('duration', durationFilter)
@@ -13,6 +13,10 @@
         ctrl.date = new Date()
         ctrl.tags = []
         ctrl.userId = ''
+        ctrl.pageSize = 10
+        ctrl.pageSizes = [10, 20, 30, 50, 100]
+        ctrl.keyword = ''
+        ctrl.oderByDuration = false
 
         ctrl.search = searchTapes;
 
