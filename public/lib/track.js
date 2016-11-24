@@ -51,7 +51,7 @@ var itrack = (function(w, $) {
             data: JSON.stringify({ i: guid, m: meta }),
             contentType: "application/json",
             success: function(d) {
-                console.log('meta sent');
+                // console.log('meta sent');
             }
         })
     }
@@ -133,14 +133,14 @@ var itrack = (function(w, $) {
      */
     var lastScrollElement = null;
     function extractEventInfo(e) {
-        console.log(e);
+        var now = +new Date();
         var arr = [];
 
         if (e.type === eventsToTrack[0]) {
             var encodedCssSelector = btoa(unescape(encodeURIComponent($(e.target).getPath())));
 
             // timeStamp could be very precise, we only need it to be milisecond.
-            arr.push('c', e.pageX, e.pageY, encodedCssSelector, parseInt(e.timeStamp));
+            arr.push('c', e.pageX, e.pageY, encodedCssSelector, now);
 
             // listen to input change event
             var targetNode = e.target.nodeName;
@@ -152,10 +152,10 @@ var itrack = (function(w, $) {
             var encodedCssSelector = "";
             if(e.target === w.document) {
                 encodedCssSelector = btoa(unescape(encodeURIComponent('document')));
-                arr.push('s', w.scrollX, w.scrollY, encodedCssSelector, parseInt(e.timeStamp));
+                arr.push('s', w.scrollX, w.scrollY, encodedCssSelector, now);
             } else {
                 encodedCssSelector = btoa(unescape(encodeURIComponent($(e.target).getPath())));
-                arr.push('s', e.target.scrollLeft, e.target.scrollTop, encodedCssSelector, parseInt(e.timeStamp));
+                arr.push('s', e.target.scrollLeft, e.target.scrollTop, encodedCssSelector, now);
             }
             // remove the element if it's the same scroll target to save bits.
             if(e.target === lastScrollElement) {
@@ -163,15 +163,16 @@ var itrack = (function(w, $) {
             }
             lastScrollElement = e.target;
         } else if (e.type === eventsToTrack[2]) {
-            arr.push('m', e.pageX, e.pageY, parseInt(e.timeStamp));
+            arr.push('m', e.pageX, e.pageY, now);
         }
 
         return arr.join(',');
     }
     function inputEventHandler(inputEvent) {
-        console.log(inputEvent.target.value);
+        var now = +new Date();
+        // console.log(inputEvent.target.value);
         var arr = [];
-        arr.push('i', inputEvent.target.value, parseInt(inputEvent.timeStamp))
+        arr.push('i', inputEvent.target.value, now)
         _events.push(arr.join(','));
     }
 
@@ -212,14 +213,14 @@ var itrack = (function(w, $) {
                 d: _events
             }
             if (sendLength) {
-                console.log(JSON.stringify(prepareData));
+                // console.log(JSON.stringify(prepareData));
                 $.ajax({
                     type: 'POST',
                     url: eventsApi,
                     data: JSON.stringify(prepareData),
                     contentType: "application/json",
                     success: function() {
-                        console.log('data sent');
+                        // console.log('data sent');
                         _events.splice(0, sendLength);
                     }
                 })
@@ -237,9 +238,9 @@ var itrack = (function(w, $) {
     function init(tags) {
         //note: if no parent window, w.parent equal to itself.
         if(inIframe() || /replay_session_id/g.test(location.href)) {
-            console.info('iTrack not enabled');
+            // console.info('iTrack not enabled');
         } else {
-            console.info('iTrack enabled');
+            // console.info('iTrack enabled');
             clearInterval(_clearTimer);
             guid = generateUUID(); // only generate once for one session.
             storeMeta(tags);
@@ -257,12 +258,6 @@ var itrack = (function(w, $) {
                 _events = [];
             }
         }, sendInterval);
-    }
-
-    function print() {
-        _events.map(function(each) {
-            console.log(each);
-        })
     }
 
     function throttle(fn, threshhold, scope) {
@@ -289,17 +284,9 @@ var itrack = (function(w, $) {
     }
 
 
-
-
-
-
     $(document).ready(function() {
         init(['mobile', 'homepage']);
     })
-
-
-    //debug
-    itrack.print = print;
 
     // api
     itrack.init = init;
