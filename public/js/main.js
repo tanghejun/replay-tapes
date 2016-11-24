@@ -16,13 +16,13 @@
 
         ctrl.search = searchTapes;
 
-
-
         function searchTapes() {
             var queryObj = {}
             queryObj.tags = ctrl.tags.join(',')
             queryObj.userId = ctrl.userId.trim()
             queryObj.time = ctrl.date ? ctrl.date.getTime() : ''
+            queryObj.urlRegex = ctrl.urlRegex ? encodeURIComponent(ctrl.urlRegex.trim()): ''
+            console.log(queryObj);
 
             ctrl.loading = true
             session.query(queryObj).then(function(data) {

@@ -33,6 +33,11 @@
                         <md-icon md-svg-src="images/user.svg" class="name"></md-icon>
                         <input ng-model="Main.userId">
                     </md-input-container>
+                    <md-input-container>
+                        <label>URL contains</label>
+                        <md-icon md-svg-src="images/url.svg" class="name"></md-icon>
+                        <input ng-model="Main.urlRegex">
+                    </md-input-container>
 
                     <md-button class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
                 </div>

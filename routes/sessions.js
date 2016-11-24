@@ -18,10 +18,9 @@ router.get('/:sessionId', (req, res) => {
 
 // query sessions
 router.get('/', (req, res) => {
-    console.log(req.query);
-    let {time, userId, tags} = toInt(req.query)
+    console.log('query obj: ', req.query);
+    let { time, userId, tags, urlRegex } = toInt(req.query)
     let start, end, querySql = {}
-    console.log(time);
     if(time && typeof time === 'number') {
         start = +moment(time).startOf('day')
         end = +moment(time).endOf('day')
@@ -34,11 +33,17 @@ router.get('/', (req, res) => {
     if(userId) {
         querySql['$or'] = [{'meta.userId': userId}, {'meta.trackId': userId}]
     }
-    // return res.json(querySql)
+
+    if(urlRegex) {
+        urlRegex = new RegExp( decodeURIComponent(urlRegex), 'i' )
+        console.log('urlRegex: ', urlRegex);
+        querySql['meta.url'] = { $regex: urlRegex};
+    }
+    // return res.send(querySql)
 
     db.get((err, conn) => {
         conn.collection('session')
-            .find(querySql, { sort: { time: -1 }, limit: 10 })
+            .find(querySql, { sort: { time: -1 } })
             .toArray((err, data) => {
                 if (data) {
                 	// leave broken data behind
