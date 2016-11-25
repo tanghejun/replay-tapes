@@ -56,8 +56,13 @@
                         </md-input-container>
                     </div>
                     <div flex>
-                        <md-switch ng-model="Main.oderByDuration" aria-label="Switch 1">
-                            Duration
+                        <md-switch ng-model="Main.newest" aria-label="newest">
+                            Newest
+                        </md-switch>
+                    </div>
+                    <div flex>
+                        <md-switch ng-model="Main.longest" aria-label="longest">
+                            Longest
                         </md-switch>
                     </div>
                     <div flex>
@@ -73,7 +78,7 @@
                         <md-progress-circular md-mode="indeterminate"></md-progress-circular>
                     </div>
                     <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
-                    <md-list-item class="md-3-line" dir-paginate="tape in Main.tapes | orderBy: 'duration': Main.oderByDuration | filter: Main.keyword | itemsPerPage: Main.pageSize">
+                    <md-list-item class="md-3-line" dir-paginate="tape in Main.tapes | orderBy: Main.orderBy | filter: Main.keyword | itemsPerPage: Main.pageSize">
                         <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
                             {{tape.events.length || 0}}
                             <md-tooltip md-direction="left">

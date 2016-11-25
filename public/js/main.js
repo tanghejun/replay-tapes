@@ -4,9 +4,9 @@
         .factory('session', session)
         .filter('duration', durationFilter)
 
-    Ctrl.$inject = ['session']
+    Ctrl.$inject = ['session', '$scope']
 
-    function Ctrl(session) {
+    function Ctrl(session, $scope) {
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
@@ -16,9 +16,29 @@
         ctrl.pageSize = 10
         ctrl.pageSizes = [10, 20, 30, 50, 100]
         ctrl.keyword = ''
-        ctrl.oderByDuration = false
+        ctrl.orderBy = []
+        ctrl.longest = false
+        ctrl.newest = true
 
         ctrl.search = searchTapes;
+
+        activate();
+
+        function activate() {
+            $scope.$watchGroup(['Main.newest', 'Main.longest'], function(newV, oldV) {
+                if(oldV !== newV) {
+                    if(newV[0] && !newV[1]) {
+                        ctrl.orderBy = ['-time']
+                    } else if(newV[1] && !newV[0]) {
+                        ctrl.orderBy = ['-duration']
+                    } else if(newV[0] && newV[1]) {
+                        ctrl.orderBy = ['-time', '-duration']
+                    } else {
+                        ctrl.orderBy = ['-time']
+                    }
+                }
+            })
+        }
 
         function searchTapes() {
             var queryObj = {}
@@ -26,7 +46,6 @@
             queryObj.userId = ctrl.userId.trim()
             queryObj.time = ctrl.date ? ctrl.date.getTime() : ''
             queryObj.urlRegex = ctrl.urlRegex ? encodeURIComponent(ctrl.urlRegex.trim()): ''
-            console.log(queryObj);
 
             ctrl.loading = true
             session.query(queryObj).then(function(data) {
@@ -46,6 +65,8 @@
                 ctrl.loading = false
             })
         }
+
+
         function getReplayUrl(tape) {
             var url = tape.meta.url
             var id = tape._id
