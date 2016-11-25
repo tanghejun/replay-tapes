@@ -4,7 +4,7 @@ var itrack = (function(w, $) {
 
         // listen to mouseup instead of click since click has greater chance to be canceled bubbling.
         // still, we can set 'useCapture=true', but not all browsers support that.
-        eventsToTrack = ['click', 'scroll', 'mousemove'],
+        eventsToTrack = ['click', 'scroll', 'mousemove', 'touchstart', 'touchmove', 'touchend'],
         server = "http://d.admx.baixing.c"+"om:8885",
         metaApi = server + '/metas',
         eventsApi = server + '/events',
@@ -166,6 +166,22 @@ var itrack = (function(w, $) {
             lastScrollElement = e.target;
         } else if (e.type === eventsToTrack[2]) {
             arr.push('m', e.pageX, e.pageY, now);
+        } else if (e.type === eventsToTrack[3]) {
+            if(e.touches && e.touches.length) {
+                var firstFinger = e.touches[0]
+                if(firstFinger) {
+                    arr.push('ts', Math.floor(firstFinger.clientX), Math.floor(firstFinger.clientY), now)
+                }
+            }
+        } else if (e.type === eventsToTrack[4]) {
+            if(e.touches && e.touches.length) {
+                var firstFinger = e.touches[0]
+                if(firstFinger) {
+                    arr.push('tm', Math.floor(firstFinger.clientX), Math.floor(firstFinger.clientY), now)
+                }
+            }
+        } else if (e.type === eventsToTrack[5]) {
+            arr.push('te', now)
         }
 
         return arr.join(',');
@@ -188,7 +204,11 @@ var itrack = (function(w, $) {
 
         // useCapture = true in case of some clicked element will stop event bubbling.
         eventsToTrack.forEach(function(event) {
-            w.addEventListener(event, throttle(eventListener, throttleInterval), true)
+            if(event === 'click') {
+                w.addEventListener(event, throttle(eventListener, throttleInterval), true)
+            } else {
+                w.addEventListener(event, throttle(eventListener, throttleInterval), false)
+            }
         })
 
         function eventListener(e) {
