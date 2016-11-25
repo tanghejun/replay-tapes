@@ -93,15 +93,18 @@ var itrack = (function(w, $) {
                 realNode.nodeName
 
             );
+            tagName = tagName.toLowerCase();
             var name = tagName;
 
             // on IE8, nodeName is '#document' at the top level, but we don't need that
-            if (!name || name == '#document') break;
+            if (!name || name === '#document' || name === 'html') break;
 
-            name = name.toLowerCase();
             if (realNode.id) {
                 // As soon as an id is found, there's no need to specify more.
                 return name + '#' + realNode.id + (path ? '>' + path : '');
+            } else if(tagName === 'body') {
+                // body need no class, so that it's easier to select when playback
+                // eg: body.mobile body.pc -> body
             } else if (realNode.className.trim()) {
                 name += '.' + realNode.className.trim().split(/\s+/).join('.');
             }
@@ -116,7 +119,6 @@ var itrack = (function(w, $) {
 
             node = parent;
         }
-
         return path;
     };
 
