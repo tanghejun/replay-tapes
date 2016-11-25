@@ -37,6 +37,7 @@
                 ctrl.tapes = ctrl.tapes.map(function(tape) {
                     tape.duration = getDuration(tape)
                     tape.summary = getEventsSummary(tape)
+                    tape.meta.replayUrl = getReplayUrl(tape)
                     return tape
                 })
             }).catch(function(err) {
@@ -44,6 +45,17 @@
             }).finally(function() {
                 ctrl.loading = false
             })
+        }
+        function getReplayUrl(tape) {
+            var url = tape.meta.url
+            var id = tape._id
+            var a = document.createElement('a')
+            a.href = url
+            if(/^\?/g.test(a.search)) {
+                return url + '&replay_session_id=' + id
+            } else {
+                return url + '?replay_session_id=' + id
+            }
         }
         function getEventsSummary(tape) {
             return tape.events.reduce(function(a, b) {
