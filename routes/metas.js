@@ -1,7 +1,11 @@
 const router = require('express').Router()
 const db = require('../db')
+const logger = require('../logger')
 
 router.post('/', function(req, res, next) {
+    logger.info('meta cookies: ', req.cookies)
+    logger.info('meta: ', req.body)
+
     let { __u, __trackId } = req.cookies
     let { i, m } = req.body
     if (i && m) {
@@ -15,12 +19,15 @@ router.post('/', function(req, res, next) {
                 { $set: { meta: m, time: +new Date() } },
                 { upsert: true },
                 (err, data) => {
-                    if(err) return res.send(err)
-                    return res.send(200)
+                    if(err)  {
+                        logger.error('post meta error', err)
+                    }
+                    return res.sendStatus(200)
                 }
             )
         })
     } else {
+        logger.error('post meta invalid i & m', i, m)
         res.sendStatus(400)
     }
 });

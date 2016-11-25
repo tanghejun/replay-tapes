@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db = require('../db')
+const logger = require('../logger')
 
 router.post('/', function(req, res, next) {
-    console.log(req.body)
+    logger.info('events: ', req.body)
     let { i, d } = req.body
     if (i && d) {
         db.get((err, conn) => {
@@ -11,13 +12,16 @@ router.post('/', function(req, res, next) {
                 { $push: { events: { $each: d } } },
                 { upsert: true },
                 (err, data) => {
-                    if (err) return res.send(err)
-                    return res.send(data)
+                    if (err) {
+                        logger.error('post events error: ', err)
+                    }
+                    return res.sendStatus(200)
                 }
             )
         })
     } else {
-        res.sendStatus(400)
+        logger.error('post events missing i & d', i, d)
+        return res.sendStatus(400)
     }
 });
 
