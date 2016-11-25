@@ -237,6 +237,7 @@ var itrack = (function(w, $) {
         }
     }
 
+    // tags is an array with strings
     function init(tags) {
         //note: if no parent window, w.parent equal to itself.
         if(inIframe() || /replay_session_id/g.test(location.href)) {
@@ -284,11 +285,6 @@ var itrack = (function(w, $) {
             }
         };
     }
-
-
-    $(document).ready(function() {
-        init(['mobile', 'homepage']);
-    })
 
     // api
     itrack.init = init;
