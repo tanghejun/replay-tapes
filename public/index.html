@@ -94,7 +94,7 @@
                             </md-tooltip>
                         </md-icon>
                         <div class="md-list-item-text" layout="column">
-                            <h3>Page: <a title="{{tape._id}}" href="{{tape.meta.replayUrl}}" target="_blank">{{tape.meta.url}}</a></h3>
+                            <h4><a title="{{tape.meta.url}}" href="{{tape.meta.replayUrl}}" target="_blank">Page URL</a>, Tape ID: {{tape._id}}</h4>
                             <h4>Tags: {{tape.meta.tags.join(', ')}}</h4>
                             <p>User: {{tape.meta.userId || tape.meta.trackId}}</p>
                             <p>Duration: {{tape.duration | duration}}, record at: {{tape.time | date: 'short'}}</p>
