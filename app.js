@@ -32,6 +32,24 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// host replay chrome extension
+app.get('/replay.crx', (req, res) => {
+  res.set({
+    'Content-Type': 'application/x-chrome-extension',
+  })
+  let options = {
+    root: __dirname + '/public'
+  }
+  res.sendFile('replay.crx', options, function(err) {
+    if(err) {
+      res.status(err.status).end()
+    } else {
+      console.log('file sent');
+    }
+  })
+})
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors());
