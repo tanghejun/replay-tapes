@@ -20,7 +20,7 @@
           </md-toolbar>
         <div layout="row" layout-xs="column" layout-padding>
             <div flex="100" flex-gt-xs="30">
-                <div layout="column" layout-align="space-between stretch">
+                <form layout="column" layout-align="space-between stretch">
                     <div>
                         <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
                         <md-button class="md-warn" ng-click="Main.date = null">clear</md-button>
@@ -40,8 +40,8 @@
                         <input ng-model="Main.urlRegex">
                     </md-input-container>
 
-                    <md-button class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
-                </div>
+                    <md-button type="submit" class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
+                </form>
             </div>
             <div flex-offset-gt-xs="10"  flex-xs="100" flex-gt-xs="70" class="search-result">
                 <div layout="row" layout-margin layout-xs="column">
