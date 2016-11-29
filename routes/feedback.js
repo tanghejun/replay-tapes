@@ -10,7 +10,7 @@ router.post('/', (req, res) => {
     content = content && content.trim()
     if (action) {
         db.get((err, conn) => {
-            conn.collection('feedback').insert({ action, content }, (err, data) => {
+            conn.collection('feedback').insert({ action, content, time: +new Date() }, (err, data) => {
                 if (err) {
                     logger.error('post feedback error', err)
                 }
