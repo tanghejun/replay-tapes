@@ -249,18 +249,10 @@ var itrack = (function(w, $) {
             }
         }, sendInterval)
     }
-    function inIframe () {
-        try {
-            return window.self !== window.top;
-        } catch (e) {
-            return true;
-        }
-    }
 
     // tags is an array with strings
     function init(tags) {
-        //note: if no parent window, w.parent equal to itself.
-        if(inIframe() || /replay_session_id/g.test(location.href)) {
+        if(/replay_session_id/g.test(location.href)) {
             // console.info('iTrack not enabled');
         } else {
             // console.info('iTrack enabled');

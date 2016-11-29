@@ -6,103 +6,114 @@
     <title>Tape Store</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
+    <link rel="stylesheet" href="node_modules/nvd3/build/nv.d3.css">
     <link rel="stylesheet" type="text/css" href="styles/style.css">
 </head>
 
-<body ng-app="tapeStore">
-    <div ng-controller="Ctrl as Main" ng-cloak>
-        <md-toolbar>
-            <div class="md-toolbar-tools">
-                <h3>
+<body ng-app="tapeStore" ng-controller="Ctrl as Main" ng-cloak layout="column">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h3>
                 <span>Find the tape</span>
               </h3>
-                <span flex></span>
-                <a href="/replay.crx">
-                    <md-button class="md-raised" aria-label="Learn More">
-                        install extension
-                        <md-tooltip md-direction="bottom">
-                            download & drop into chrome://extensions
-                        </md-tooltip>
-                    </md-button>
-                </a>
-            </div>
-        </md-toolbar>
-        <div layout="row" layout-xs="column" layout-padding>
-            <div flex="100" flex-gt-xs="30">
-                <form layout="column" layout-align="space-between stretch">
-                    <div>
-                        <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
-                        <md-button class="md-warn" ng-click="Main.date = null">clear</md-button>
-                    </div>
-                    <div class="chips-wrapper">
-                        <md-icon md-svg-src="images/tag.svg" class="tag-icon"></md-icon>
-                        <md-chips ng-model="Main.tags" placeholder="Enter a tag" readonly="false" md-removable="true" md-enable-chip-edit="true" secondary-placeholder="+Tag"></md-chips>
-                    </div>
-                    <md-input-container>
-                        <label>User ID/ Track ID</label>
-                        <md-icon md-svg-src="images/user.svg" class="name"></md-icon>
-                        <input ng-model="Main.userId">
-                    </md-input-container>
-                    <md-input-container>
-                        <label>URL contains</label>
-                        <md-icon md-svg-src="images/url.svg" class="name"></md-icon>
-                        <input ng-model="Main.urlRegex">
-                    </md-input-container>
-                    <md-button type="submit" class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
-                </form>
-            </div>
-            <div flex-offset-gt-xs="10" flex-xs="100" flex-gt-xs="70" class="search-result">
-                <div layout="row" layout-margin layout-xs="column">
-                    <div flex>
-                        <md-input-container>
-                            <label>Page size</label>
-                            <md-select ng-model="Main.pageSize">
-                                <md-option ng-repeat="state in Main.pageSizes" ng-value="state">
-                                    {{state}}
-                                </md-option>
-                            </md-select>
-                        </md-input-container>
-                    </div>
-                    <div flex>
-                        <md-switch ng-model="Main.newest" aria-label="newest">
-                            Newest
-                        </md-switch>
-                    </div>
-                    <div flex>
-                        <md-switch ng-model="Main.longest" aria-label="longest">
-                            Longest
-                        </md-switch>
-                    </div>
-                    <div flex>
-                        <md-input-container>
-                            <label>Search</label>
-                            <input ng-model="Main.keyword">
-                        </md-input-container>
-                    </div>
+            <span flex></span>
+            <a href="/replay.crx">
+                <md-button class="md-raised" aria-label="Learn More">
+                    install extension
+                    <md-tooltip md-direction="bottom">
+                        download & drop into chrome://extensions
+                    </md-tooltip>
+                </md-button>
+            </a>
+        </div>
+    </md-toolbar>
+    <div layout="column"  layout-gt-xs="row" layout-padding flex>
+        <div flex="100" flex-gt-xs="30">
+            <form layout="column" layout-align="space-between stretch">
+                <div>
+                    <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
+                    <md-button class="md-warn" ng-click="Main.date = null">clear</md-button>
                 </div>
-                <md-list>
-                    <md-subheader class="md-no-sticky">Search Results: {{Main.tapes.length || ''}}</md-subheader>
-                    <div layout="row" layout-sm="column" layout-align="space-around center" class="loading" ng-if="Main.loading">
-                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                    </div>
-                    <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
-                    <md-list-item class="md-3-line" dir-paginate="tape in Main.tapes | orderBy: Main.orderBy | filter: Main.keyword | itemsPerPage: Main.pageSize">
-                        <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
-                            {{tape.events.length || 0}}
-                            <md-tooltip md-direction="left">
-                                {{tape.summary | json}}
-                            </md-tooltip>
-                        </md-icon>
-                        <div class="md-list-item-text" layout="column">
-                            <h4><a title="{{tape.meta.url}}" href="{{tape.meta.replayUrl}}" target="_blank">Page URL</a>, Tape ID: {{tape._id}}</h4>
-                            <h4>Tags: {{tape.meta.tags.join(', ')}}</h4>
-                            <p>User: {{tape.meta.userId || tape.meta.trackId}}</p>
-                            <p>Duration: {{tape.duration | duration}}, record at: {{tape.time | date: 'short'}}</p>
+                <div class="chips-wrapper">
+                    <md-icon md-svg-src="images/tag.svg" class="tag-icon"></md-icon>
+                    <md-chips ng-model="Main.tags" placeholder="Enter a tag" readonly="false" md-removable="true" md-enable-chip-edit="true" secondary-placeholder="+Tag"></md-chips>
+                </div>
+                <md-input-container>
+                    <label>User ID/ Track ID</label>
+                    <md-icon md-svg-src="images/user.svg" class="name"></md-icon>
+                    <input ng-model="Main.userId">
+                </md-input-container>
+                <md-input-container>
+                    <label>URL contains</label>
+                    <md-icon md-svg-src="images/url.svg" class="name"></md-icon>
+                    <input ng-model="Main.urlRegex">
+                </md-input-container>
+                <md-button type="submit" class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
+            </form>
+        </div>
+        <div flex-offset-gt-xs="10" flex="100" flex-gt-xs="70" layout="row" class="search-result">
+            <md-tabs flex>
+                <md-tab label="Search">
+                    <md-content>
+                        <div layout="row" layout-margin layout-xs="column">
+                            <div flex>
+                                <md-input-container>
+                                    <label>Page size</label>
+                                    <md-select ng-model="Main.pageSize">
+                                        <md-option ng-repeat="state in Main.pageSizes" ng-value="state">
+                                            {{state}}
+                                        </md-option>
+                                    </md-select>
+                                </md-input-container>
+                            </div>
+                            <div flex>
+                                <md-switch ng-model="Main.newest" aria-label="newest">
+                                    Newest
+                                </md-switch>
+                            </div>
+                            <div flex>
+                                <md-switch ng-model="Main.longest" aria-label="longest">
+                                    Longest
+                                </md-switch>
+                            </div>
+                            <div flex>
+                                <md-input-container>
+                                    <label>Search</label>
+                                    <input ng-model="Main.keyword">
+                                </md-input-container>
+                            </div>
                         </div>
-                    </md-list-item>
-                </md-list>
-                <dir-pagination-controls></dir-pagination-controls>
-            </div>
+                        <md-list>
+                            <md-subheader class="md-no-sticky">Search Results: {{Main.tapes.length || ''}}</md-subheader>
+                            <div layout="row" layout-sm="column" layout-align="space-around center" class="loading" ng-if="Main.loading">
+                                <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                            </div>
+                            <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
+                            <md-list-item class="md-3-line" dir-paginate="tape in Main.tapes | orderBy: Main.orderBy | filter: Main.keyword | itemsPerPage: Main.pageSize">
+                                <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
+                                    {{tape.events.length || 0}}
+                                    <md-tooltip md-direction="left">
+                                        {{tape.summary | json}}
+                                    </md-tooltip>
+                                </md-icon>
+                                <div class="md-list-item-text" layout="column">
+                                    <h4><a title="{{tape.meta.url}}" href="{{tape.meta.replayUrl}}" target="_blank">Page URL</a>, Tape ID: {{tape._id}}</h4>
+                                    <h4>Tags: {{tape.meta.tags.join(', ')}}</h4>
+                                    <p>User: {{tape.meta.userId || tape.meta.trackId}}</p>
+                                    <p>Duration: {{tape.duration | duration}}, record at: {{tape.time | date: 'short'}}</p>
+                                </div>
+                            </md-list-item>
+                        </md-list>
+                        <dir-pagination-controls></dir-pagination-controls>
+                    </md-content>
+                </md-tab>
+                <md-tab label="Statistics" md-on-select="Main.draw()">
+                    <md-content>
+                        <h1>hello</h1>
+                        <nvd3 options="Main.options" data="Main.data"></nvd3>
+                    </md-content>
+                </md-tab>
+            </md-tabs>
         </div>
     </div>
     <script src="node_modules/angular/angular.min.js"></script>
@@ -110,6 +121,9 @@
     <script src="node_modules/angular-animate/angular-animate.min.js"></script>
     <script src="node_modules/angular-material/angular-material.min.js"></script>
     <script src="node_modules/angular-utils-pagination/dirPagination.js"></script>
+    <script src="node_modules/d3/d3.min.js"></script>
+    <script src="node_modules/nvd3/build/nv.d3.min.js"></script>
+    <script src="node_modules/angular-nvd3/dist/angular-nvd3.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 
