@@ -2,11 +2,12 @@
     angular.module('tapeStore', ['ngMaterial', 'angularUtils.directives.dirPagination'])
         .controller('Ctrl', Ctrl)
         .factory('session', session)
+        .factory('feedback', feedback)
         .filter('duration', durationFilter)
 
-    Ctrl.$inject = ['session', '$scope']
+    Ctrl.$inject = ['session', '$scope', '$mdDialog', 'feedback']
 
-    function Ctrl(session, $scope) {
+    function Ctrl(session, $scope, $mdDialog, feedback) {
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
@@ -20,9 +21,10 @@
         ctrl.longest = false
         ctrl.newest = true
 
-        ctrl.search = searchTapes;
+        ctrl.search = searchTapes
+        ctrl.giveFeedback = giveFeedback
 
-        activate();
+        activate()
 
         function activate() {
             $scope.$watchGroup(['Main.newest', 'Main.longest'], function(newV, oldV) {
@@ -102,6 +104,24 @@
                 return num
             }
         }
+
+        function giveFeedback(ev) {
+            // Appending dialog to document.body to cover sidenav in docs app
+            var confirm = $mdDialog.prompt()
+              .title('So you like it! tell us a little more')
+              .textContent('say something about function, UI, chrome extension')
+              .placeholder('your feedback')
+              .ariaLabel('feedback')
+              .targetEvent(ev)
+              .ok('Okay!')
+              .cancel('Cancel')
+
+            $mdDialog.show(confirm).then(function(result) {
+                feedback.send({ action: 'feedback', content: result && result.trim() })
+            }, function() {
+                feedback.send({ action: 'like'})
+            })
+          }
     }
 
     function durationFilter() {
@@ -141,7 +161,19 @@
         return api
     }
 
+    feedback.$inject = ['$http']
 
+    function feedback($http) {
+        var api = {
+            send: sendFeedback
+        }
+
+        function sendFeedback(fb) {
+            return $http.post('/feedback/', fb)
+        }
+
+        return api
+    }
 
 
 })()

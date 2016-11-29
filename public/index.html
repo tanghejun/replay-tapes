@@ -14,8 +14,8 @@
         <md-toolbar>
             <div class="md-toolbar-tools">
                 <h3>
-                <span>Find the tape</span>
-              </h3>
+                    <span>Find the tape</span>
+                </h3>
                 <span flex></span>
                 <a href="/replay.crx">
                     <md-button class="md-raised" aria-label="Learn More">
@@ -25,6 +25,9 @@
                         </md-tooltip>
                     </md-button>
                 </a>
+                <md-button class="md-fab md-mini" aria-label="Favorite" ng-click="Main.giveFeedback($event)">
+                    <md-icon md-svg-src="images/fav.svg"></md-icon>
+                </md-button>
             </div>
         </md-toolbar>
         <div layout="row" layout-xs="column" layout-padding>

@@ -10,6 +10,7 @@ var db = require('./db')
 var metas = require('./routes/metas');
 var events = require('./routes/events');
 var sessions = require('./routes/sessions');
+var feedback = require('./routes/feedback');
 
 var app = express();
 
@@ -57,6 +58,7 @@ app.use(cors());
 app.use('/metas', metas);
 app.use('/events', events);
 app.use('/sessions', sessions);
+app.use('/feedback', feedback);
 
 
 
