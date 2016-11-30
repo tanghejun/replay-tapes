@@ -219,3 +219,9 @@ md-input-container > md-icon {
   cursor: not-allowed;
   background-color: #fff;
 }
+
+/* duration range */
+.duration-range {
+  height: 30px;
+  min-width: 350px;
+}

@@ -1,9 +1,10 @@
 (function() {
-    angular.module('tapeStore', ['ngMaterial', 'angularUtils.directives.dirPagination'])
+    angular.module('tapeStore', ['ngMaterial', 'angularUtils.directives.dirPagination', 'ui-rangeSlider'])
         .controller('Ctrl', Ctrl)
         .factory('session', session)
         .factory('feedback', feedback)
         .filter('duration', durationFilter)
+        .filter('range', rangeFilter)
 
     Ctrl.$inject = ['session', '$scope', '$mdDialog', 'feedback']
 
@@ -20,6 +21,13 @@
         ctrl.orderBy = []
         ctrl.longest = false
         ctrl.newest = true
+        ctrl.durationRange = {
+            min: 0,
+            max: 300,
+            userMin: 0,
+            userMax: 20,
+            disable: false
+        }
 
         ctrl.search = searchTapes
         ctrl.giveFeedback = giveFeedback
@@ -132,13 +140,28 @@
             var m = Math.floor( value / 60)
             var s = value % 60
             var str = ''
-            if(m) {
+            if(m >= 1) {
                 str += m + 'm'
             }
-            if(s) {
+            if(s >= 0) {
                 str += s + 's'
             }
             return str;
+        }
+    }
+    function rangeFilter() {
+        return function( items, property ,rangeInfo ) {
+            if(!items) {
+                return null;
+            }
+            if(rangeInfo.disable) {
+                return items;
+            }
+            var min = parseInt(rangeInfo.userMin);
+            var max = parseInt(rangeInfo.userMax);
+            return items.filter(function(item) {
+                return item[property] >= min && item[property] <= max
+            })
         }
     }
 
