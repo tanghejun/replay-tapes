@@ -1,4 +1,4 @@
-var itrack = (function(w, $) {
+var itrack = (function($) {
     var itrack = {},
         _events = [],
 
@@ -21,14 +21,11 @@ var itrack = (function(w, $) {
      * @return {Object}
      */
     function getMeta() {
-        var width = Math.max(document.documentElement.clientWidth,
-            w.innerWidth || 0);
-        var height = Math.max(document.documentElement.clientHeight,
-            w.innerHeight || 0);
         var meta = {
-            ua: w.navigator.userAgent,
-            url: w.location.href,
-            size: width + ',' + height
+            ua: window.navigator.userAgent,
+            url: window.location.href,
+            size: $(window).width() + ',' + $(window).height(),
+            dsize: $(window.document).width() + ',' + $(window.document).height()
         };
         return meta;
     }
@@ -62,7 +59,7 @@ var itrack = (function(w, $) {
      */
     function generateUUID() {
         var d = new Date().getTime();
-        if (w.performance && typeof w.performance.now === "function") {
+        if (window.performance && typeof window.performance.now === "function") {
             d += performance.now(); //use high-precision timer if available
         }
         var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -152,9 +149,9 @@ var itrack = (function(w, $) {
 
         } else if (e.type === eventsToTrack[1]) {
             var encodedCssSelector = "";
-            if(e.target === w.document) {
+            if(e.target === window.document) {
                 encodedCssSelector = btoa(unescape(encodeURIComponent('document')));
-                arr.push('s', w.scrollX, w.scrollY, encodedCssSelector, now);
+                arr.push('s', window.scrollX, window.scrollY, encodedCssSelector, now);
             } else {
                 encodedCssSelector = btoa(unescape(encodeURIComponent($(e.target).getPath())));
                 arr.push('s', e.target.scrollLeft, e.target.scrollTop, encodedCssSelector, now);
@@ -205,9 +202,9 @@ var itrack = (function(w, $) {
         // useCapture = true in case of some clicked element will stop event bubbling.
         eventsToTrack.forEach(function(event) {
             if(event === 'click') {
-                w.addEventListener(event, throttle(eventListener, throttleInterval), true)
+                window.addEventListener(event, throttle(eventListener, throttleInterval), true)
             } else {
-                w.addEventListener(event, throttle(eventListener, throttleInterval), false)
+                window.addEventListener(event, throttle(eventListener, throttleInterval), false)
             }
         })
 
@@ -249,18 +246,10 @@ var itrack = (function(w, $) {
             }
         }, sendInterval)
     }
-    function inIframe () {
-        try {
-            return window.self !== window.top;
-        } catch (e) {
-            return true;
-        }
-    }
 
     // tags is an array with strings
     function init(tags) {
-        //note: if no parent window, w.parent equal to itself.
-        if(inIframe() || /replay_session_id/g.test(location.href)) {
+        if(typeof $ !== 'function' || /replay_session_id/g.test(location.href)) {
             // console.info('iTrack not enabled');
         } else {
             // console.info('iTrack enabled');
@@ -312,4 +301,4 @@ var itrack = (function(w, $) {
 
     return itrack;
 
-})(window, $)
+})($)
