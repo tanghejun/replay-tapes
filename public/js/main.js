@@ -1,8 +1,9 @@
 (function() {
-    angular.module('tapeStore', ['ngMaterial', 'angularUtils.directives.dirPagination', 'nvd3'])
+    angular.module('tapeStore', ['ngMaterial', 'angularUtils.directives.dirPagination'])
         .controller('Ctrl', Ctrl)
         .factory('session', session)
         .filter('duration', durationFilter)
+        .directive('echart', echart)
 
     Ctrl.$inject = ['session', '$scope']
 
@@ -10,7 +11,7 @@
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
-        ctrl.date = new Date()
+        ctrl.date = new Date(2016, 10, 26)
         ctrl.tags = []
         ctrl.userId = ''
         ctrl.pageSize = 10
@@ -104,102 +105,73 @@
         }
 
         function drawDiagram() {
-            //click points
-            var points = ctrl.tapes.map(function(tape) {
+            ctrl.scatterOption = {
+                title: {
+                    text: 'interaction scatter'
+                },
+                xAxis: [{
+                    type: 'value',
+                    scale: false,
+                    position: 'top',
+                    min: 0
+                }],
+                yAxis: [{
+                    type: 'value',
+                    scale: false,
+                    inverse: true,
+                    min: 0
+                }],
+                legend: {
+                    data:['click', 'touch', 'scroll']
+                },
+                series: [{
+                    name: 'click',
+                    type: 'scatter',
+                    symbolSize: 2,
+                    large: true,
+                    data: getPoints(ctrl.tapes, 'c')
+                }, {
+                    name: 'touch',
+                    type: 'scatter',
+                    symbolSize: 2,
+                    large: true,
+                    data: getPoints(ctrl.tapes, 'ts')
+                }, {
+                    name: 'scroll',
+                    type: 'scatter',
+                    symbolSize: 2,
+                    large: true,
+                    data: getPoints(ctrl.tapes, 's')
+                }],
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataZoom : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+            }
+
+        }
+
+        function getPoints(tapes, interaction) {
+            return ctrl.tapes.map(function(tape) {
                 return tape.events.filter(function(event) {
-                    return event[0] === 'c'
+                    if(interaction === 'te') return false
+                    return event.startsWith(interaction)
                 }).map(function(event) {
                     var arr = event.split(',')
-                    return { x: Number(arr[1]), y: Number(arr[2]) }
+                    return [ Number(arr[1]), Number(arr[2]) ]
                 })
             }).filter(function(tape) {
                 return tape.length
             }).reduce(function(a, b) {
                 return a.concat(b)
             }, [])
-            console.log(points);
-            ctrl.data = [{
-                color: '#1f77b4',
-                key: 'click',
-                values: points
-            }]
-
         }
-
-
-        ctrl.options = {
-            chart: {
-                type: 'scatterChart',
-                height: 450,
-                color: d3.scale.category10().range(),
-                scatter: {
-                    onlyCircles: false
-                },
-                showDistX: true,
-                showDistY: true,
-                tooltipContent: function(key) {
-                    return '<h3>' + key + '</h3>';
-                },
-                duration: 350,
-                xAxis: {
-                    axisLabel: 'X Axis',
-                    tickFormat: function(d){
-                        return d3.format('.02f')(d);
-                    },
-                    orient: 'top',
-                    transform: 'translate(400,-400)'
-                },
-                yAxis: {
-                    axisLabel: 'Y Axis',
-                    tickFormat: function(d){
-                        return d3.format('.02f')(d);
-                    },
-                    axisLabelDistance: 30,
-                    orient: 'left'
-                },
-                zoom: {
-                    //NOTE: All attributes below are optional
-                    enabled: true,
-                    scaleExtent: [1, 10],
-                    useFixedDomain: true,
-                    useNiceScale: false,
-                    horizontalOff: false,
-                    verticalOff: false,
-                    unzoomEventType: 'dblclick.zoom'
-                }
-            }
-        };
-
-        // ctrl.data = generateData(4,40);
-        console.log(ctrl.data);
-
-        /* Random Data Generator (took from nvd3.org) */
-        function generateData(groups, points) { //# groups,# points per group
-            var data = [],
-                shapes = ['circle', 'cross', 'triangle-up', 'triangle-down', 'diamond', 'square'],
-                random = d3.random.normal();
-
-            for (var i = 0; i < groups; i++) {
-                data.push({
-                    key: 'Group ' + i,
-                    values: [],
-                    slope: Math.random() - .01,
-                    intercept: Math.random() - .5
-                });
-
-                for (var j = 0; j < points; j++) {
-                    data[i].values.push({
-                        x: random(),
-                        y: random(),
-                        size: Math.random(),
-                        shape: shapes[j % 6]
-                    });
-                }
-            }
-            return data;
-        }
-
-
 
     }
 
@@ -243,7 +215,24 @@
         return api
     }
 
-
+    function echart() {
+        return {
+            restrict: 'E',
+            scope: {
+                option: '='
+            },
+            template: '<div style="width: 600px;height:400px;"></div>',
+            link: function(scope, ele) {
+                console.log('directive run');
+                scope.$watch('option', function(newV, oldV) {
+                    if(newV && newV !== oldV) {
+                        console.log('draw');
+                        echarts.init(ele.children()[0]).setOption(scope.option)
+                    }
+                })
+            }
+        }
+    }
 
 
 })()
