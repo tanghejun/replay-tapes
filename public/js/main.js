@@ -193,7 +193,7 @@
                 xAxis: {
                     name: 'read ratio',
                     type: 'category',
-                    data: ['10%', '50%', '80%', 'higher']
+                    data: ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%']
                 },
                 yAxis: {
                     name: 'total ' + ctrl.tapes.length,
@@ -207,7 +207,7 @@
                 series: [{
                     type: 'bar',
                     data: (function() {
-                        return generateBins(ctrl.tapes.map(getReadRatio), [0.1, 0.5, 0.8])
+                        return generateBins1(ctrl.tapes.map(getReadRatio), [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
                             .map(function(bin) {
                                 console.log(bin.length)
                                 return bin.length
@@ -238,6 +238,9 @@
                 lastScroll = scrolls[scrolls.length - 1].split(',')[2]
             }
             var dheight = tape.meta.dsize && tape.meta.dsize.split(',')[1]
+            if(!dheight) {
+                return 0
+            }
             return lastScroll / Number(dheight)
         }
 
@@ -259,6 +262,16 @@
                     result.push(bin.splice(0, bin.length))
                 }
             }
+            return result
+        }
+
+        function generateBins1(data, binRange) {
+            var result = []
+            binRange.map(function(bin) {
+                result.push( data.filter(function(d) {
+                    return d >= bin
+                }) )
+            })
             return result
         }
     }
