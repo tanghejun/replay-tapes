@@ -111,7 +111,7 @@
         function drawScatter() {
             ctrl.scatterOption = {
                 title: {
-                    text: 'scatter',
+                    text: 'Scatter',
                     left: 50
                 },
                 xAxis: [{
@@ -193,19 +193,30 @@
                 xAxis: {
                     name: 'read ratio',
                     type: 'category',
-                    data: ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%']
+                    data: ['>10%', '>20%', '>30%', '>40%', '>50%', '>60%', '>70%', '>80%', '>90%'],
+                    axisTick: {
+                        alignWithLabel: true
+                    }
                 },
                 yAxis: {
                     name: 'total ' + ctrl.tapes.length,
-                    type: 'value'
+                    type: 'value',
+                    max: ctrl.tapes.length
                 },
                 tooltip: {
                     formatter: function(params) {
-                        return params.value + '=> ' + Math.floor( params.value / ctrl.tapes.length * 1000) / 10 + '%' 
+                        return params.value + ' => ' + Math.floor( params.value / ctrl.tapes.length * 1000) / 10 + '%'
                     }
                 },
                 series: [{
                     type: 'bar',
+                    label: {
+                        normal: {
+                            show: true,
+                            formatter: '{c}',
+                            position: ['35%', -15],
+                        }
+                    },
                     data: (function() {
                         return generateBins1(ctrl.tapes.map(getReadRatio), [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
                             .map(function(bin) {
