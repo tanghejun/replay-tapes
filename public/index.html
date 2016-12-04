@@ -108,9 +108,9 @@
                     </md-content>
                 </md-tab>
                 <md-tab label="Statistics" md-on-select="Main.draw()">
-                    <md-content>
-                        <h1>hello</h1>
-                        <echart option="Main.scatterOption"></echart>
+                    <md-content layout="column">
+                        <echart option="Main.scatterOption" flex></echart>
+                        <echart option="Main.readRatioOption" flex></echart>
                     </md-content>
                 </md-tab>
             </md-tabs>

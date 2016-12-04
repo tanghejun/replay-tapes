@@ -11,7 +11,7 @@
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
-        ctrl.date = new Date(2016, 10, 26)
+        ctrl.date = new Date(2016, 11, 2)
         ctrl.tags = []
         ctrl.userId = ''
         ctrl.pageSize = 10
@@ -22,7 +22,7 @@
         ctrl.newest = true
 
         ctrl.search = searchTapes
-        ctrl.draw = drawDiagram
+        ctrl.draw = drawPlots
         activate();
 
         function activate() {
@@ -104,30 +104,42 @@
             }
         }
 
-        function drawDiagram() {
+        function drawPlots() {
+            drawScatter()
+            drawReadRatio()
+        }
+        function drawScatter() {
             ctrl.scatterOption = {
                 title: {
-                    text: 'interaction scatter'
+                    text: 'scatter',
+                    left: 50
                 },
                 xAxis: [{
+                    name: 'x',
                     type: 'value',
                     scale: false,
                     position: 'top',
-                    min: 0
+                    min: -50
                 }],
                 yAxis: [{
+                    name: 'y',
                     type: 'value',
                     scale: false,
                     inverse: true,
                     min: 0
                 }],
                 legend: {
-                    data:['click', 'touch', 'scroll']
+                    data:['click', 'touch', 'scroll'],
+                    selected: {
+                        click: true,
+                        touch: false,
+                        scroll: false
+                    }
                 },
                 series: [{
                     name: 'click',
                     type: 'scatter',
-                    symbolSize: 2,
+                    symbolSize: 3,
                     large: true,
                     data: getPoints(ctrl.tapes, 'c')
                 }, {
@@ -139,7 +151,7 @@
                 }, {
                     name: 'scroll',
                     type: 'scatter',
-                    symbolSize: 2,
+                    symbolSize: 4,
                     large: true,
                     data: getPoints(ctrl.tapes, 's')
                 }],
@@ -154,7 +166,6 @@
                     }
                 },
             }
-
         }
 
         function getPoints(tapes, interaction) {
@@ -173,6 +184,83 @@
             }, [])
         }
 
+        function drawReadRatio() {
+            ctrl.readRatioOption = {
+                title: {
+                    text: 'Read Ratio',
+                    left: 50
+                },
+                xAxis: {
+                    name: 'read ratio',
+                    type: 'category',
+                    data: ['10%', '50%', '80%', 'higher']
+                },
+                yAxis: {
+                    name: 'total ' + ctrl.tapes.length,
+                    type: 'value'
+                },
+                tooltip: {
+                    formatter: function(params) {
+                        return params.value + '=> ' + Math.floor( params.value / ctrl.tapes.length * 1000) / 10 + '%' 
+                    }
+                },
+                series: [{
+                    type: 'bar',
+                    data: (function() {
+                        return generateBins(ctrl.tapes.map(getReadRatio), [0.1, 0.5, 0.8])
+                            .map(function(bin) {
+                                console.log(bin.length)
+                                return bin.length
+                            })
+
+                    })()
+                }],
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataZoom : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+            }
+        }
+
+        function getReadRatio(tape) {
+            var lastScroll = 0;
+            var scrolls = tape.events.filter(function(event) {
+                var arr = event.split(',')
+                return arr[0] === 's'
+            })
+            if(scrolls.length) {
+                lastScroll = scrolls[scrolls.length - 1].split(',')[2]
+            }
+            var dheight = tape.meta.dsize && tape.meta.dsize.split(',')[1]
+            return lastScroll / Number(dheight)
+        }
+
+        // data: array
+        // binRange: [0.1, 0.3, 0.5] will return 4 bins
+        function generateBins(data, binRange) {
+            var sorted = data.sort(function(a,b) {return a-b})
+            var result = []
+            var bin = []
+            for(var i=0; i<binRange.length; i++) {
+                while(sorted[0] < binRange[i]) {
+                    bin.push(sorted[0])
+                    sorted.shift()
+                }
+                result.push(bin.splice(0, bin.length))
+                console.log(result)
+                if(i === binRange.length - 1) {
+                    bin = sorted
+                    result.push(bin.splice(0, bin.length))
+                }
+            }
+            return result
+        }
     }
 
     function durationFilter() {
@@ -221,12 +309,13 @@
             scope: {
                 option: '='
             },
-            template: '<div style="width: 600px;height:400px;"></div>',
+            template: '<div flex></div>',
             link: function(scope, ele) {
                 console.log('directive run');
                 scope.$watch('option', function(newV, oldV) {
                     if(newV && newV !== oldV) {
                         console.log('draw');
+                        ele.children()[0].style.height = "400px"
                         echarts.init(ele.children()[0]).setOption(scope.option)
                     }
                 })
