@@ -375,7 +375,7 @@
                 return arr[0] === 's'
             })
             if (scrolls.length) {
-                lastScroll = scrolls[scrolls.length - 1].split(',')[2]
+                lastScroll = Number( scrolls[scrolls.length - 1].split(',')[2] ) || 0
             }
             var dheight = Number( tape.meta.dsize && tape.meta.dsize.split(',')[1] )
             if (!dheight) {
