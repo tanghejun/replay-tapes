@@ -368,6 +368,7 @@
         }
 
         function getReadRatio(tape) {
+            var defaultHeight = 500
             var lastScroll = 0;
             var scrolls = tape.events.filter(function(event) {
                 var arr = event.split(',')
@@ -376,11 +377,12 @@
             if (scrolls.length) {
                 lastScroll = scrolls[scrolls.length - 1].split(',')[2]
             }
-            var dheight = tape.meta.dsize && tape.meta.dsize.split(',')[1]
+            var dheight = Number( tape.meta.dsize && tape.meta.dsize.split(',')[1] )
             if (!dheight) {
                 return 0
             }
-            return lastScroll / Number(dheight)
+            var wheight = Number( tape.meta.size && tape.meta.size.split(',')[1] ) || defaultHeight
+            return ( lastScroll + wheight ) / dheight
         }
 
 
