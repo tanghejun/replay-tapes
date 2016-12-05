@@ -10,102 +10,109 @@
     <link rel="stylesheet" type="text/css" href="styles/style.css">
 </head>
 
-<body ng-app="tapeStore">
-    <div ng-controller="Ctrl as Main" ng-cloak>
-        <md-toolbar>
-            <div class="md-toolbar-tools">
-                <h3>
-                    <span>Find the tape</span>
-                </h3>
-                <span flex></span>
-                <a href="/replay.crx">
-                    <md-button class="md-raised" aria-label="Learn More">
-                        install extension
-                        <md-tooltip md-direction="bottom">
-                            download & drop into chrome://extensions
-                        </md-tooltip>
-                    </md-button>
-                </a>
-                <md-button class="md-fab md-mini" aria-label="Favorite" ng-click="Main.giveFeedback($event)">
-                    <md-icon md-svg-src="images/fav.svg"></md-icon>
+<body ng-app="tapeStore" ng-controller="Ctrl as Main" ng-cloak layout="column">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h3>Find the tape</h3>
+            <span flex></span>
+            <a href="/replay.crx">
+                <md-button class="md-raised" aria-label="Learn More">
+                    install extension
+                    <md-tooltip md-direction="bottom">
+                        download & drop into chrome://extensions
+                    </md-tooltip>
                 </md-button>
-            </div>
-        </md-toolbar>
-        <div layout="row" layout-xs="column" layout-padding>
-            <div flex="100" flex-gt-xs="30">
-                <form layout="column" layout-align="space-between stretch">
-                    <div>
-                        <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
-                        <md-button class="md-warn" ng-click="Main.date = null">clear</md-button>
-                    </div>
-                    <div class="chips-wrapper">
-                        <md-icon md-svg-src="images/tag.svg" class="tag-icon"></md-icon>
-                        <md-chips ng-model="Main.tags" placeholder="Enter a tag" readonly="false" md-removable="true" md-enable-chip-edit="true" secondary-placeholder="+Tag"></md-chips>
-                    </div>
-                    <md-input-container>
-                        <label>User ID/ Track ID</label>
-                        <md-icon md-svg-src="images/user.svg" class="name"></md-icon>
-                        <input ng-model="Main.userId">
-                    </md-input-container>
-                    <md-input-container>
-                        <label>URL contains</label>
-                        <md-icon md-svg-src="images/url.svg" class="name"></md-icon>
-                        <input ng-model="Main.urlRegex">
-                    </md-input-container>
-                    <md-button type="submit" class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
-                </form>
-            </div>
-            <div flex-offset-gt-xs="10" flex-xs="100" flex-gt-xs="70" class="search-result">
-                <div layout="row" layout-margin layout-xs="column" layout-align="space-around center">
-                    <div>
-                        <md-input-container>
-                            <label>Page size</label>
-                            <md-select ng-model="Main.pageSize">
-                                <md-option ng-repeat="state in Main.pageSizes" ng-value="state">
-                                    {{state}}
-                                </md-option>
-                            </md-select>
-                        </md-input-container>
-                    </div>
-                    <div class="duration-range" range-slider min="Main.durationRange.min" max="Main.durationRange.max" model-min="Main.durationRange.userMin" model-max="Main.durationRange.userMax" show-values="true" filter="duration" disabled="Main.durationRange.disable"></div>
-                    <div>
-                        <md-switch ng-model="Main.durationRange.disable" aria-label="newest">
-                            Disable Range
-                        </md-switch>
-                        <md-switch ng-model="Main.newest" aria-label="newest">
-                            Newest
-                        </md-switch>
-                        <md-switch ng-model="Main.longest" aria-label="longest">
-                            Longest
-                        </md-switch>
-                    </div>
+            </a>
+            <md-button class="md-fab md-mini" aria-label="Favorite" ng-click="Main.giveFeedback($event)">
+                <md-icon md-svg-src="images/fav.svg"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <div layout="column" layout-gt-xs="row" layout-padding flex>
+        <div flex="100" flex-gt-xs="30">
+            <form layout="column" layout-align="space-between stretch">
+                <div>
+                    <md-datepicker ng-model="Main.date" md-min-date="Main.minDate" md-max-date="Main.maxDate" md-open-on-focus md-placeholder="Record date"></md-datepicker>
+                    <md-button class="md-warn" ng-click="Main.date = null">clear</md-button>
                 </div>
-                <md-list>
-                    <md-subheader class="md-no-sticky">Search Results: {{filtered.length ||Main.tapes.length || ''}}</md-subheader>
-                    <div layout="row" layout-sm="column" layout-align="space-around center" class="loading" ng-if="Main.loading">
-                        <md-progress-circular md-mode="indeterminate"></md-progress-circular>
-                    </div>
-                    <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
-                    <md-list-item class="md-3-line" dir-paginate="tape in (filtered = (Main.tapes |range:'duration': Main.durationRange | orderBy: Main.orderBy)) | itemsPerPage: Main.pageSize">
-                        <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
-                            {{tape.events.length || 0}}
-                            <md-tooltip md-direction="left">
-                                {{tape.summary | json}}
-                            </md-tooltip>
-                        </md-icon>
-                        <div class="md-list-item-text" layout="column">
-                            <h4><a title="{{tape.meta.url}}" href="{{tape.meta.replayUrl}}" target="_blank">Page URL</a>, Tape ID: {{tape._id}}</h4>
-                            <h4>Tags: {{tape.meta.tags.join(', ')}}</h4>
-                            <p>User: {{tape.meta.userId || tape.meta.trackId}}</p>
-                            <p>Duration: {{tape.duration | duration}}, record at: {{tape.time | date: 'short'}}</p>
+                <div class="chips-wrapper">
+                    <md-icon md-svg-src="images/tag.svg" class="tag-icon"></md-icon>
+                    <md-chips ng-model="Main.tags" placeholder="Enter a tag" readonly="false" md-removable="true" md-enable-chip-edit="true" secondary-placeholder="+Tag"></md-chips>
+                </div>
+                <md-input-container>
+                    <label>User ID/ Track ID</label>
+                    <md-icon md-svg-src="images/user.svg" class="name"></md-icon>
+                    <input ng-model="Main.userId">
+                </md-input-container>
+                <md-input-container>
+                    <label>URL contains</label>
+                    <md-icon md-svg-src="images/url.svg" class="name"></md-icon>
+                    <input ng-model="Main.urlRegex">
+                </md-input-container>
+                <md-button type="submit" class="md-raised md-primary" ng-click="Main.search()">Search</md-button>
+            </form>
+        </div>
+        <div flex-offset-gt-xs="10" flex-xs="100" flex-gt-xs="70" layout="row" class="search-result">
+            <md-tabs flex>
+                <md-tab label="Search">
+                    <md-content>
+                        <div layout="row" layout-margin layout-xs="column" layout-align="space-around center">
+                            <div>
+                                <md-input-container>
+                                    <label>Page size</label>
+                                    <md-select ng-model="Main.pageSize">
+                                        <md-option ng-repeat="state in Main.pageSizes" ng-value="state">
+                                            {{state}}
+                                        </md-option>
+                                    </md-select>
+                                </md-input-container>
+                            </div>
+                            <div class="duration-range" range-slider min="Main.durationRange.min" max="Main.durationRange.max" model-min="Main.durationRange.userMin" model-max="Main.durationRange.userMax" show-values="true" filter="duration" disabled="Main.durationRange.disable"></div>
+                            <div>
+                                <md-switch ng-model="Main.durationRange.disable" aria-label="newest">
+                                    Disable Range
+                                </md-switch>
+                                <md-switch ng-model="Main.newest" aria-label="newest">
+                                    Newest
+                                </md-switch>
+                                <md-switch ng-model="Main.longest" aria-label="longest">
+                                    Longest
+                                </md-switch>
+                            </div>
                         </div>
-                    </md-list-item>
-                </md-list>
-                <dir-pagination-controls></dir-pagination-controls>
-            </div>
+                        <md-list>
+                            <md-subheader class="md-no-sticky">Search Results: {{filtered.length ||Main.tapes.length || ''}}</md-subheader>
+                            <div layout="row" layout-sm="column" layout-align="space-around center" class="loading" ng-if="Main.loading">
+                                <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                            </div>
+                            <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
+                            <md-list-item class="md-3-line" dir-paginate="tape in (filtered = (Main.tapes |range:'duration': Main.durationRange | orderBy: Main.orderBy)) | itemsPerPage: Main.pageSize">
+                                <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
+                                    {{tape.events.length || 0}}
+                                    <md-tooltip md-direction="left">
+                                        {{tape.summary | json}}
+                                    </md-tooltip>
+                                </md-icon>
+                                <div class="md-list-item-text" layout="column">
+                                    <h4><a title="{{tape.meta.url}}" href="{{tape.meta.replayUrl}}" target="_blank">Page URL</a>, Tape ID: {{tape._id}}</h4>
+                                    <h4>Tags: {{tape.meta.tags.join(', ')}}</h4>
+                                    <p>User: {{tape.meta.userId || tape.meta.trackId}}</p>
+                                    <p>Duration: {{tape.duration | duration}}, record at: {{tape.time | date: 'short'}}</p>
+                                </div>
+                            </md-list-item>
+                        </md-list>
+                        <dir-pagination-controls></dir-pagination-controls>
+                    </md-content>
+                </md-tab>
+                <md-tab label="Statistics" md-on-select="Main.draw()">
+                    <md-content layout="column" layout-margin layout-padding>
+                        <echart option="Main.scatterOption"></echart>
+                        <echart option="Main.readRatioOption"></echart>
+                    </md-content>
+                </md-tab>
+            </md-tabs>
         </div>
     </div>
-
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/angular/angular.min.js"></script>
     <script src="node_modules/angular-aria/angular-aria.min.js"></script>
@@ -113,6 +120,7 @@
     <script src="node_modules/angular-material/angular-material.min.js"></script>
     <script src="node_modules/angular-utils-pagination/dirPagination.js"></script>
     <script src="node_modules/angular-rangeslider/angular.rangeSlider.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.3.1/echarts.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 
