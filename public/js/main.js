@@ -358,6 +358,7 @@
                 yAxis: {
                     name: 'total ' + ctrl.tapes.length,
                     type: 'value',
+                    max: 'dataMax'
                 },
                 tooltip : {
                     trigger: 'axis',
@@ -386,21 +387,18 @@
                     type: 'bar',
                     stack: 'events',
                     barWidth: 10,
-                    barMinHeight: 10,
                     data: avgClicks
                 }, {
                     name: 'avgTouch',
                     type: 'bar',
                     stack: 'events',
                     barWidth: 10,
-                    barMinHeight: 10,
                     data: avgTouches
                 }, {
                     name: 'avgScroll',
                     type: 'bar',
                     stack: 'events',
                     barWidth: 10,
-                    barMinHeight: 10,
                     data: avgScrolls
                 }],
                 toolbox: {
