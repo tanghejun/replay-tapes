@@ -13,7 +13,7 @@
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
-        ctrl.date = new Date(2016, 10, 27)
+        ctrl.date = new Date()
         ctrl.tags = []
         ctrl.userId = ''
         ctrl.pageSize = 10
@@ -137,6 +137,9 @@
         }
 
         function drawScatter() {
+            if(!ctrl.tapes || !ctrl.tapes.length) {
+                return
+            }
             ctrl.scatterOption = {
                 title: {
                     text: 'Scatter',
@@ -213,6 +216,9 @@
         }
 
         function drawReadRatio() {
+            if(!ctrl.tapes || !ctrl.tapes.length) {
+                return
+            }
             ctrl.readRatioOption = {
                 title: {
                     text: 'Read Ratio',
@@ -233,7 +239,7 @@
                 },
                 tooltip: {
                     formatter: function(params) {
-                        return params.value + ' => ' + Math.floor(params.value / ctrl.tapes.length * 1000) / 10 + '%'
+                        return Math.floor(params.value / ctrl.tapes.length * 1000) / 10 + '%'
                     }
                 },
                 series: [{
@@ -326,6 +332,9 @@
         }
 
         function drawDuration() {
+            if(!ctrl.tapes || !ctrl.tapes.length) {
+                return
+            }
             var bins = generateBins2(
                 ctrl.tapes,
                 function(d, i) {
@@ -337,7 +346,7 @@
             ctrl.durationOption = {
                 title: {
                     text: 'Stay Duration',
-                    left: 5
+                    left: 50
                 },
                 xAxis: {
                     name: 'stay duration',
@@ -352,42 +361,42 @@
                     type: 'value',
                     max: ctrl.tapes.length
                 },
-                tooltip: {
-                    formatter: function(params) {
-                        return params.value + ' => ' + Math.floor(params.value / ctrl.tapes.length * 1000) / 10 + '%'
+                tooltip : {
+                    trigger: 'axis',
+                    axisPointer : {
+                        type : 'shadow'
                     }
                 },
                 legend: {
-                    data: ['click', 'touch', 'scroll']
+                    data: ['avgClick', 'avgTouch', 'avgScroll']
                 },
                 series: [{
+                    name: 'tapes',
                     type: 'bar',
                     label: {
                         normal: {
                             show: true,
                             formatter: '{c}',
-                            position: ['35%', -15],
+                            position: [0, -15],
                         }
                     },
-                    data: (function() {
-                        return bins.map(function(bin) {
+                    data: bins.map(function(bin) {
                             return bin.length
-                        })
-                    })()
+                          })
                 }, {
-                    name: 'click',
+                    name: 'avgClick',
                     type: 'bar',
                     stack: 'events',
                     barWidth: 10,
                     data: avgClicks
                 }, {
-                    name: 'touch',
+                    name: 'avgTouch',
                     type: 'bar',
                     stack: 'events',
                     barWidth: 10,
                     data: avgTouches
                 }, {
-                    name: 'scroll',
+                    name: 'avgScroll',
                     type: 'bar',
                     stack: 'events',
                     barWidth: 10,
@@ -411,9 +420,9 @@
                 if (!bin.length) {
                     return 0
                 }
-                return bin.reduce(function(a, b) {
+                return Math.floor( bin.reduce(function(a, b) {
                     return a + (b.summary[interaction] || 0)
-                }, 0) / bin.length
+                }, 0) / bin.length * 10 ) / 10
             })
         }
 
