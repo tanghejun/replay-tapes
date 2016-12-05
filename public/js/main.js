@@ -235,6 +235,7 @@
                 yAxis: {
                     name: 'total ' + ctrl.tapes.length,
                     type: 'value',
+                    max: ctrl.tapes.length
                 },
                 tooltip: {
                     formatter: function(params) {
