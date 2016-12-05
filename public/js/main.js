@@ -32,9 +32,6 @@
 
         ctrl.search = searchTapes
         ctrl.giveFeedback = giveFeedback
-        ctrl.drawScatter = drawScatter
-        ctrl.drawReadRatio = drawReadRatio
-        ctrl.drawDuration = drawDuration
 
         activate()
 
@@ -73,6 +70,9 @@
                     tape.meta.replayUrl = getReplayUrl(tape)
                     return tape
                 })
+                drawScatter()
+                drawDuration()
+                drawReadRatio()
             }).catch(function(err) {
                 ctrl.message = err.message
             }).finally(function() {
