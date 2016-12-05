@@ -84,7 +84,7 @@
                             </div>
                         </div>
                         <md-list>
-                            <md-subheader class="md-no-sticky">Search Results: {{filtered.length ||Main.tapes.length || ''}}</md-subheader>
+                            <md-subheader class="md-no-sticky">Search Results: {{filtered.length ||Main.tapes.length || ''}} {{Main.tapes ? '/': ''}} {{Main.tapes.length}}</md-subheader>
                             <p ng-show="Main.tapes.length === 0" class="message">{{Main.message}}</p>
                             <md-list-item class="md-3-line" dir-paginate="tape in (filtered = (Main.tapes |range:'duration': Main.durationRange | orderBy: Main.orderBy)) | itemsPerPage: Main.pageSize">
                                 <md-icon title="interactions" class="md-avatar-icon events-num" md-colors="{background: 'blue-grey'}">
