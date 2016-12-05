@@ -104,10 +104,16 @@
                         <dir-pagination-controls></dir-pagination-controls>
                     </md-content>
                 </md-tab>
-                <md-tab label="Statistics" md-on-select="Main.draw()">
+                <md-tab label="Statistics">
                     <md-content layout="column" layout-margin layout-padding>
+                        <div layout="row" layout-align="space-around center">
+                            <md-button ng-click="Main.drawScatter()" class="md-raised">scatter</md-button>
+                            <md-button ng-click="Main.drawReadRatio()" class="md-raised">read ratio</md-button>
+                            <md-button ng-click="Main.drawDuration()" class="md-raised">duration</md-button>
+                        </div>
                         <echart option="Main.scatterOption"></echart>
                         <echart option="Main.readRatioOption"></echart>
+                        <echart option="Main.durationOption"></echart>
                     </md-content>
                 </md-tab>
             </md-tabs>

@@ -13,7 +13,7 @@
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
-        ctrl.date = new Date(2016, 11, 2)
+        ctrl.date = new Date(2016, 10, 27)
         ctrl.tags = []
         ctrl.userId = ''
         ctrl.pageSize = 10
@@ -32,9 +32,11 @@
 
         ctrl.search = searchTapes
         ctrl.giveFeedback = giveFeedback
+        ctrl.drawScatter = drawScatter
+        ctrl.drawReadRatio = drawReadRatio
+        ctrl.drawDuration = drawDuration
 
         activate()
-        ctrl.draw = drawPlots
 
         function activate() {
             $scope.$watchGroup(['Main.newest', 'Main.longest'], function(newV, oldV) {
@@ -134,11 +136,6 @@
             })
         }
 
-        function drawPlots() {
-            drawScatter()
-            drawReadRatio()
-        }
-
         function drawScatter() {
             ctrl.scatterOption = {
                 title: {
@@ -191,7 +188,7 @@
                     feature: {
                         mark: { show: true },
                         dataZoom: { show: true },
-                        dataView: { show: true, readOnly: false },
+                        dataView: { show: true, readOnly: true },
                         restore: { show: true },
                         saveAsImage: { show: true }
                     }
@@ -261,7 +258,7 @@
                     feature: {
                         mark: { show: true },
                         dataZoom: { show: true },
-                        dataView: { show: true, readOnly: false },
+                        dataView: { show: true, readOnly: true },
                         restore: { show: true },
                         saveAsImage: { show: true }
                     }
@@ -289,7 +286,8 @@
         // binRange: [0.1, 0.3, 0.5] will return 4 bins
         function generateBins(data, binRange) {
             var sorted = data.sort(function(a, b) {
-                return a - b })
+                return a - b
+            })
             var result = []
             var bin = []
             for (var i = 0; i < binRange.length; i++) {
@@ -316,6 +314,109 @@
             })
             return result
         }
+
+        function generateBins2(data, mapFn, binRange) {
+            var result = []
+            binRange.map(function(bin) {
+                result.push(data.filter(function(d, i) {
+                    return mapFn(d, i) >= bin
+                }))
+            })
+            return result
+        }
+
+        function drawDuration() {
+            var bins = generateBins2(
+                ctrl.tapes,
+                function(d, i) {
+                    return d.duration }, [5, 10, 20, 30, 40, 50, 60, 120, 300]
+            )
+            var avgClicks = getAvgInBins(bins, 'c')
+            var avgTouches = getAvgInBins(bins, 't')
+            var avgScrolls = getAvgInBins(bins, 's')
+            ctrl.durationOption = {
+                title: {
+                    text: 'Stay Duration',
+                    left: 5
+                },
+                xAxis: {
+                    name: 'stay duration',
+                    type: 'category',
+                    data: ['>5s', '>10s', '>20s', '>30s', '>40s', '>50s', '>1m', '>2m', '>5m'],
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                },
+                yAxis: {
+                    name: 'total ' + ctrl.tapes.length,
+                    type: 'value',
+                    max: ctrl.tapes.length
+                },
+                tooltip: {
+                    formatter: function(params) {
+                        return params.value + ' => ' + Math.floor(params.value / ctrl.tapes.length * 1000) / 10 + '%'
+                    }
+                },
+                legend: {
+                    data: ['click', 'touch', 'scroll']
+                },
+                series: [{
+                    type: 'bar',
+                    label: {
+                        normal: {
+                            show: true,
+                            formatter: '{c}',
+                            position: ['35%', -15],
+                        }
+                    },
+                    data: (function() {
+                        return bins.map(function(bin) {
+                            return bin.length
+                        })
+                    })()
+                }, {
+                    name: 'click',
+                    type: 'bar',
+                    stack: 'events',
+                    barWidth: 10,
+                    data: avgClicks
+                }, {
+                    name: 'touch',
+                    type: 'bar',
+                    stack: 'events',
+                    barWidth: 10,
+                    data: avgTouches
+                }, {
+                    name: 'scroll',
+                    type: 'bar',
+                    stack: 'events',
+                    barWidth: 10,
+                    data: avgScrolls
+                }],
+                toolbox: {
+                    show: true,
+                    feature: {
+                        mark: { show: true },
+                        dataZoom: { show: true },
+                        dataView: { show: true, readOnly: true },
+                        restore: { show: true },
+                        saveAsImage: { show: true }
+                    }
+                }
+            }
+        }
+
+        function getAvgInBins(bins, interaction) {
+            return bins.map(function(bin) {
+                if (!bin.length) {
+                    return 0
+                }
+                return bin.reduce(function(a, b) {
+                    return a + (b.summary[interaction] || 0)
+                }, 0) / bin.length
+            })
+        }
+
     }
 
     function durationFilter() {
@@ -357,19 +458,18 @@
     session.$inject = ['$http', '$httpParamSerializer']
 
     function session($http, $httpParamSerializer) {
-        var host = 'http://d.admx.baixing.com:8885'
         var api = {
             get: getSession,
             query: querySession
         }
 
         function getSession(id) {
-            return $http.get(host + '/sessions/' + id)
+            return $http.get('/sessions/' + id)
         }
 
         function querySession(query) {
             var result = $httpParamSerializer(query)
-            return $http.get(host + '/sessions?' + result)
+            return $http.get('/sessions?' + result)
         }
 
         return api
