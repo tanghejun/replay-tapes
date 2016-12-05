@@ -355,11 +355,17 @@
                         alignWithLabel: true
                     }
                 },
-                yAxis: {
+                yAxis: [{
                     name: 'total ' + ctrl.tapes.length,
                     type: 'value',
-                    max: 'dataMax'
-                },
+                    max: ctrl.tapes.length
+                }, {
+                    name: 'events',
+                    type: 'value',
+                    splitLine: {
+                        show: false
+                    }
+                }],
                 tooltip : {
                     trigger: 'axis',
                     axisPointer : {
@@ -386,19 +392,22 @@
                     name: 'avgClick',
                     type: 'bar',
                     stack: 'events',
-                    barWidth: 10,
+                    yAxisIndex: 1,
+                    barWidth: 5,
                     data: avgClicks
                 }, {
                     name: 'avgTouch',
                     type: 'bar',
                     stack: 'events',
-                    barWidth: 10,
+                    yAxisIndex: 1,
+                    barWidth: 5,
                     data: avgTouches
                 }, {
                     name: 'avgScroll',
                     type: 'bar',
                     stack: 'events',
-                    barWidth: 10,
+                    yAxisIndex: 1,
+                    barWidth: 5,
                     data: avgScrolls
                 }],
                 toolbox: {
