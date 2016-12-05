@@ -357,7 +357,7 @@
     session.$inject = ['$http', '$httpParamSerializer']
 
     function session($http, $httpParamSerializer) {
-        var host = 'http://localhost:3001'
+        var host = 'http://d.admx.baixing.com:8885'
         var api = {
             get: getSession,
             query: querySession
