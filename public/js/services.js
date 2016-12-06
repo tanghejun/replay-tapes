@@ -169,7 +169,7 @@
                         }
                     },
                     data: (function() {
-                        return generateBins1(tapes.map(tapeHelper.getReadRatio), [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+                        return generateBins(tapes, tapeHelper.getReadRatio, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
                             .map(function(bin) {
                                 return bin.length
                             })
@@ -189,41 +189,9 @@
             }
         }
 
-        // data: array
-        // binRange: [0.1, 0.3, 0.5] will return 4 bins
-        function generateBins(data, binRange) {
-            var sorted = data.sort(function(a, b) {
-                return a - b
-            })
+        function generateBins(data, mapFn, binRange) {
             var result = []
-            var bin = []
-            for (var i = 0; i < binRange.length; i++) {
-                while (sorted[0] < binRange[i]) {
-                    bin.push(sorted[0])
-                    sorted.shift()
-                }
-                result.push(bin.splice(0, bin.length))
-                console.log(result)
-                if (i === binRange.length - 1) {
-                    bin = sorted
-                    result.push(bin.splice(0, bin.length))
-                }
-            }
-            return result
-        }
-
-        function generateBins1(data, binRange) {
-            var result = []
-            binRange.map(function(bin) {
-                result.push(data.filter(function(d) {
-                    return d >= bin
-                }))
-            })
-            return result
-        }
-
-        function generateBins2(data, mapFn, binRange) {
-            var result = []
+            mapFn = mapFn || function(d, i) { return d }
             binRange.map(function(bin) {
                 result.push(data.filter(function(d, i) {
                     return mapFn(d, i) >= bin
@@ -233,7 +201,7 @@
         }
 
         function getDurationOption(tapes) {
-            var bins = generateBins2(
+            var bins = generateBins(
                 tapes,
                 function(d, i) {
                     return d.duration
