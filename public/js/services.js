@@ -201,16 +201,12 @@
         }
 
         function getDurationOption(tapes) {
-            var bins = generateBins(
+            var bins = generateBins
+            (
                 tapes,
-                function(d, i) {
-                    return d.duration
-                }, [5, 10, 20, 30, 40, 50, 60, 120, 300]
+                function(d, i) { return d.duration },
+                [5, 10, 20, 30, 40, 50, 60, 120, 300]
             )
-            var avgClicks = getAvgInBins(bins, 'c')
-            var avgTouches = getAvgInBins(bins, 't')
-            var avgScrolls = getAvgInBins(bins, 's')
-            var avgInputs = getAvgInBins(bins, 'i')
 
             return {
                 title: {
@@ -263,28 +259,28 @@
                     stack: 'events',
                     yAxisIndex: 1,
                     barWidth: 5,
-                    data: avgClicks
+                    data: getAvgInBins(bins, 'c')
                 }, {
                     name: 'avgTouch',
                     type: 'bar',
                     stack: 'events',
                     yAxisIndex: 1,
                     barWidth: 5,
-                    data: avgTouches
+                    data: getAvgInBins(bins, 't')
                 }, {
                     name: 'avgScroll',
                     type: 'bar',
                     stack: 'events',
                     yAxisIndex: 1,
                     barWidth: 5,
-                    data: avgScrolls
+                    data: getAvgInBins(bins, 's')
                 }, {
                     name: 'avgInput',
                     type: 'bar',
                     stack: 'events',
                     yAxisIndex: 1,
                     barWidth: 5,
-                    data: avgInputs
+                    data: getAvgInBins(bins, 'i')
                 }],
                 toolbox: {
                     show: true,
@@ -323,18 +319,19 @@
 
         function getDuration(tape) {
             var lastIndex = tape.events.length - 1;
-            return Math.ceil((getTime(tape.events[lastIndex]) - getTime(tape.events[0])) / 1000)
-
-            function getTime(event) {
-                var arr = event.split(',')
-                var num = Number(arr[arr.length - 1])
-                if (num < 0) {
-                    num = 0
-                }
-                return num
-            }
+            return Math.ceil((getEventTime(tape.events[lastIndex]) - getEventTime(tape.events[0])) / 1000)
         }
 
+        function getEventTime(event) {
+            var arr = event.split(',')
+            var num = Number(arr[arr.length - 1])
+            if (!num || num < 0) {
+                num = 0
+            }
+            return num
+        }
+
+        // not accrute since only scroll position is considered, no staying time required.
         function getReadRatio(tape) {
             var defaultHeight = 500
             var largestScroll = 0;
