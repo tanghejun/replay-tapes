@@ -99,28 +99,14 @@
                 },
                 color: ['#c23531', '#222', '#4CAF50', 'gray'],
                 xAxis: [{
-                    name: 'X',
                     type: 'value',
                     scale: false,
                     position: 'top',
-                    nameLocation: 'middle',
-                    nameTextStyle: {
-                        color: 'black',
-                        fontWeight: 400,
-                        fontSize: 14
-                    },
                     min: 0
                 }],
                 yAxis: [{
-                    name: 'Y',
                     type: 'value',
                     scale: false,
-                    nameLocation: 'middle',
-                    nameTextStyle: {
-                        color: 'black',
-                        fontWeight: 400,
-                        fontSize: 14
-                    },
                     inverse: true,
                     min: 0
                 }],
