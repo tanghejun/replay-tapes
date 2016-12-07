@@ -100,7 +100,7 @@
                     type: 'value',
                     scale: false,
                     position: 'top',
-                    min: -50
+                    min: 0
                 }],
                 yAxis: [{
                     name: 'y',
