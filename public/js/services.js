@@ -64,6 +64,32 @@
             }, [])
         }
 
+        function getPointsScatter(points, squareSize) {
+            var count = points.map(function(p) {
+                var x = Math.floor( p[0] / squareSize )
+                var y = Math.floor( p[1] / squareSize )
+                return x + ',' + y
+            }).reduce(function(a, b) {
+                if(a[b] === undefined) {
+                    a[b] = 0
+                } else {
+                    a[b]++
+                }
+                return a
+            }, {})
+            var r = Object.keys(count).map(function(key) {
+                if(count[key]) {
+                    var x = squareSize / 2 * Number( key.split(',')[0] )
+                    var y = squareSize / 2 * Number( key.split(',')[1] )
+                    return [x, y, count[key]]
+                }
+                return null
+            }).filter(function(a) {
+                return a !== null
+            })
+            return r
+        }
+
         function getScatterOption(tapes) {
             return {
                 title: {
@@ -84,32 +110,62 @@
                     min: 0
                 }],
                 legend: {
-                    data: ['click', 'touch', 'scroll'],
+                    data: ['click', 'touch', 'scroll', 'move'],
                     selected: {
                         click: true,
                         touch: false,
-                        scroll: false
+                        scroll: false,
+                        move: false
                     }
                 },
                 series: [{
                     name: 'click',
                     type: 'scatter',
-                    symbolSize: 3,
+                    symbolSize: 5,
                     large: true,
-                    data: getPoints(tapes, 'c')
+                    data: getPoints(tapes, 'c'),
+                    itemStyle: {
+                        normal: {
+                            color: '#c23531'
+                        }
+                    }
                 }, {
                     name: 'touch',
                     type: 'scatter',
                     symbolSize: 2,
                     large: true,
-                    data: getPoints(tapes, 'ts')
+                    data: getPoints(tapes, 'ts'),
+                    itemStyle: {
+                        normal: {
+                            color: '#222'
+                        }
+                    }
                 }, {
                     name: 'scroll',
                     type: 'scatter',
-                    symbolSize: 4,
+                    symbolSize: function(d) {
+                        if(d[2] < 2) return 2
+                        return Math.log2(d[2]) * 2
+                    },
                     large: true,
-                    data: getPoints(tapes, 's')
-                }],
+                    data: getPointsScatter( getPoints(tapes, 's'), 200),
+                    itemStyle: {
+                        normal: {
+                            color: '#4CAF50'
+                        }
+                    }
+                }, {
+                    name: 'move',
+                    type: 'scatter',
+                    symbolSize: 2,
+                    large: true,
+                    data: getPoints(tapes, 'm'),
+                    itemStyle: {
+                        normal: {
+                            color: 'gray'
+                        }
+                    }
+                },],
                 tooltip: {
                     trigger: 'axis',
                     axisPointer: {
