@@ -156,6 +156,7 @@
                         xAxisIndex: [0],
                         filterMode: 'empty',
                         labelPrecision: 0,
+                        showDataShadow: false,
                     },
                     {
                         id: 'dataZoomY',
@@ -163,6 +164,7 @@
                         yAxisIndex: [0],
                         filterMode: 'empty',
                         labelPrecision: 0,
+                        showDataShadow: false,
                     }
                 ],
                 tooltip: {
