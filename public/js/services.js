@@ -55,7 +55,9 @@
                     return event.startsWith(interaction)
                 }).map(function(event) {
                     var arr = event.split(',')
-                    return [Number(arr[1]), Number(arr[2])]
+                    var x = Number(arr[1])
+                    var y = Number(arr[2])
+                    return [x, y]
                 })
             }).filter(function(tape) {
                 return tape.length
@@ -95,17 +97,30 @@
                 title: {
                     text: 'Screen Actions',
                 },
+                color: ['#c23531', '#222', '#4CAF50', 'gray'],
                 xAxis: [{
-                    name: 'x',
+                    name: 'X',
                     type: 'value',
                     scale: false,
                     position: 'top',
+                    nameLocation: 'middle',
+                    nameTextStyle: {
+                        color: 'black',
+                        fontWeight: 400,
+                        fontSize: 14
+                    },
                     min: 0
                 }],
                 yAxis: [{
-                    name: 'y',
+                    name: 'Y',
                     type: 'value',
                     scale: false,
+                    nameLocation: 'middle',
+                    nameTextStyle: {
+                        color: 'black',
+                        fontWeight: 400,
+                        fontSize: 14
+                    },
                     inverse: true,
                     min: 0
                 }],
@@ -124,22 +139,14 @@
                     symbolSize: 5,
                     large: true,
                     data: getPoints(tapes, 'c'),
-                    itemStyle: {
-                        normal: {
-                            color: '#c23531'
-                        }
-                    }
+
                 }, {
                     name: 'touch',
                     type: 'scatter',
                     symbolSize: 2,
                     large: true,
                     data: getPoints(tapes, 'ts'),
-                    itemStyle: {
-                        normal: {
-                            color: '#222'
-                        }
-                    }
+
                 }, {
                     name: 'scroll',
                     type: 'scatter',
@@ -149,23 +156,29 @@
                     },
                     large: true,
                     data: getPointsScatter( getPoints(tapes, 's'), 200),
-                    itemStyle: {
-                        normal: {
-                            color: '#4CAF50'
-                        }
-                    }
                 }, {
                     name: 'move',
                     type: 'scatter',
                     symbolSize: 2,
                     large: true,
                     data: getPoints(tapes, 'm'),
-                    itemStyle: {
-                        normal: {
-                            color: 'gray'
-                        }
+                }],
+                dataZoom: [
+                    {
+                        id: 'dataZoomX',
+                        type: 'slider',
+                        xAxisIndex: [0],
+                        filterMode: 'empty',
+                        labelPrecision: 0,
+                    },
+                    {
+                        id: 'dataZoomY',
+                        type: 'slider',
+                        yAxisIndex: [0],
+                        filterMode: 'empty',
+                        labelPrecision: 0,
                     }
-                },],
+                ],
                 tooltip: {
                     trigger: 'axis',
                     axisPointer: {

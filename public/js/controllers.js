@@ -8,7 +8,7 @@
         var ctrl = this
         ctrl.minDate = new Date(2016, 10, 10)
         ctrl.maxDate = new Date(2017, 10, 10)
-        ctrl.date = new Date()
+        ctrl.date = new Date(2016, 10, 27)
         ctrl.tags = []
         ctrl.userId = ''
         ctrl.pageSize = 10
