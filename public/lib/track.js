@@ -5,7 +5,7 @@ var itrack = (function($) {
         // listen to mouseup instead of click since click has greater chance to be canceled bubbling.
         // still, we can set 'useCapture=true', but not all browsers support that.
         eventsToTrack = ['click', 'scroll', 'mousemove', 'touchstart', 'touchmove', 'touchend'],
-        server = "http://d.admx.baixing.c"+"om:8885",
+        server = "http://your-server.com",
         metaApi = server + '/metas',
         eventsApi = server + '/events',
         guid,
